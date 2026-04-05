@@ -13,7 +13,6 @@ spring:
     change-log: classpath:/db/changelog/db.changelog-master.yaml
   jpa:
     hibernate:
-
       show-sql: false
       ddl-auto: validate
     defer-datasource-initialization: false
@@ -36,6 +35,9 @@ spring:
           starttls:
             enable: true
             required: true
+  config:
+    import:
+      optional: .env
 logging:
   file:
     name: src/main/resources/application_logs.txt

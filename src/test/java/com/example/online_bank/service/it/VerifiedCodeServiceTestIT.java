@@ -44,7 +44,7 @@ class VerifiedCodeServiceTestIT {
     @MockBean
     private MailService mailService;
     @MockBean
-    JwtConfig jwtConfig;
+    private JwtConfig jwtConfig;
 
     @Test
     @Transactional
@@ -78,6 +78,10 @@ class VerifiedCodeServiceTestIT {
         verifiedCodeService.clearOldCodes();
         List<VerifiedCode> allOtp = verifiedCodeRepository.findAll();
         assertTrue(allOtp.isEmpty());
+    }
+
+    public void test() {
+        System.out.println("Hello");
     }
 
     @Test

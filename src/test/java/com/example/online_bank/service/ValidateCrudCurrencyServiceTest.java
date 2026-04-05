@@ -1,6 +1,6 @@
 package com.example.online_bank.service;
 
-import com.example.online_bank.domain.dto.ConvertCurrencyResponse;
+import com.example.online_bank.domain.dto.ConvertCurrencyResponseDto;
 import com.example.online_bank.enums.CurrencyCode;
 import com.example.online_bank.repository.ExchangeCurrencyRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -18,12 +18,12 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
-class ValidateCurrencyServiceTest {
+class ValidateCrudCurrencyServiceTest {
     @InjectMocks
     ValidateCurrencyService validateCurrencyService;
 
     @Mock
-    CurrencyService currencyService;
+    CurrencyConversionService currencyConversionService;
 
     @Mock
     ExchangeCurrencyRepository exchangeCurrencyRepository;
@@ -48,7 +48,8 @@ class ValidateCurrencyServiceTest {
         String accountNumberTo = "0002";
         BigDecimal amount = BigDecimal.valueOf(200);
 
-        when(currencyService.convertCurrency(accountCurrencyCode, selectedCurrencyCode, amount)).thenReturn(new ConvertCurrencyResponse(selectedCurrencyCode, BigDecimal.valueOf(2000), amount, accountCurrencyCode));
+        when(currencyConversionService.convert(accountCurrencyCode, selectedCurrencyCode, amount))
+                .thenReturn(new ConvertCurrencyResponseDto(accountCurrencyCode, selectedCurrencyCode, BigDecimal.valueOf(2000), amount));
         when(exchangeCurrencyRepository.existsByBaseCurrencyAndTargetCurrency(selectedCurrencyCode, accountCurrencyCode)).thenReturn(true);
         BigDecimal result = validateCurrencyService.processTransaction(accountCurrencyCode, selectedCurrencyCode, accountService::withdrawMoney, "001", amount);
         Assertions.assertEquals(BigDecimal.valueOf(2000), result);

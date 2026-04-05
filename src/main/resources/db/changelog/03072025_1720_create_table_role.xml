@@ -8,16 +8,16 @@
         <sql>
             create table if not exists role
             (
-                id
-                bigserial
-                primary
-                key,
-                name
-                varchar
+            id
+            bigserial
+            primary
+            key,
+            name
+            varchar
             (
-                100
+            100
             )
-                )
+            )
         </sql>
 
     </changeSet>

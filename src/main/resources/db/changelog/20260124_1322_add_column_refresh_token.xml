@@ -5,10 +5,10 @@
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <changeSet id="20260124_1322_add_column_refresh_token.xml" author="agilmanov">
-    <sql>
-        alter table refresh_token
-        add column expires_at timestamp,
-        add column revoked_at timestamp
-    </sql>
+        <sql>
+            alter table refresh_token
+            add column expires_at timestamp,
+            add column revoked_at timestamp
+        </sql>
     </changeSet>
 </databaseChangeLog>

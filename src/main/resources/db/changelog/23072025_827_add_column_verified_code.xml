@@ -7,7 +7,7 @@
     <changeSet id="23072025_827_add_column_verified_code.xml" author="amirgilmanov">
         <sql>
             alter table verified_code
-                add column created_at timestamp
+            add column created_at timestamp
         </sql>
     </changeSet>
 </databaseChangeLog>

@@ -16,12 +16,12 @@ public class PartnerBankController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public void create(@RequestBody BankPartnerDto dto){
+    public void create(@RequestBody BankPartnerDto dto) {
         bankPartnerService.create(dto.name(), dto.category());
     }
 
     @GetMapping
-    public List<BankPartnerDto> getAll(){
+    public List<BankPartnerDto> getAll() {
         return bankPartnerService.getAll();
     }
 }

@@ -25,6 +25,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
@@ -33,7 +34,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
 
-//    @Value("${app.cors.allowed-origins}")
+    //    @Value("${app.cors.allowed-origins}")
 //    private String corsUrl;
     private static final String url = "https://online-bank-hyper-revolution-computer-systems-8zcoa3c4f.vercel.app/";
 
@@ -89,13 +90,21 @@ public class SecurityConfig {
                         sessionManagement.sessionCreationPolicy(STATELESS))
 
                 .exceptionHandling(exceptionHandling ->
-                        exceptionHandling.authenticationEntryPoint(new HttpStatusEntryPoint(UNAUTHORIZED)))
+                        exceptionHandling
+                                .authenticationEntryPoint(new HttpStatusEntryPoint(UNAUTHORIZED))
+                                .accessDeniedHandler(((request, response, accessDeniedException) -> {
+                                    response.setStatus(FORBIDDEN.value());
+                                }))
+                )
                 .addFilterBefore(jwtRequestFilter, BasicAuthenticationFilter.class)
-                .build();
+                .build()
+
+
+                ;
     }
 
     @Bean
-   // @Profile("dirty-config")
+    // @Profile("dirty-config")
     public CorsConfigurationSource dirtyCorsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 

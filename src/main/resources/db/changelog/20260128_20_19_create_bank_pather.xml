@@ -7,10 +7,10 @@
     <changeSet id="20260128_20_19_create_bank_pather" author="gilma">
         <sql>
             create table if not exists bank_partner(
-                id bigserial primary key,
-                name varchar(100),
-                partner_category varchar(100),
-                account_id bigint references account(id)
+            id bigserial primary key,
+            name varchar(100),
+            partner_category varchar(100),
+            account_id bigint references account(id)
             )
         </sql>
     </changeSet>

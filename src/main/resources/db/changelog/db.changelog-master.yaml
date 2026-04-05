@@ -63,3 +63,5 @@ databaseChangeLog:
       file: db/changelog/20260220_1333_add_column_balance.xml
   - include:
       file: db/changelog/20260219_1503_batch_data.xml
+  - include:
+      file: db/changelog/20260504_2241_update_column_in_exchange_rate.xml

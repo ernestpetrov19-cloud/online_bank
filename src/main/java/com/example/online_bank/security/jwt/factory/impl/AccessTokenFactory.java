@@ -67,6 +67,7 @@ public class AccessTokenFactory implements TokenFactory {
                 .compact();
         System.out.println(token);
 
+        //todo сделать тестовые логи
         log.info("access token created {}", token);
         return token;
     }

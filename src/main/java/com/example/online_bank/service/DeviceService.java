@@ -17,6 +17,7 @@ import static com.example.online_bank.enums.SecurityMessage.CONFIRM_LOGIN_MESSAG
 @RequiredArgsConstructor
 public class DeviceService {
     private final VerifiedCodeService verifiedCodeService;
+
     public void checkDeviceBinding(String deviceId, TrustedDevice trustedDevice) {
         if (!trustedDevice.getDeviceId().equals(deviceId)) {
             throw new SecurityException("Подозрительное устройство");

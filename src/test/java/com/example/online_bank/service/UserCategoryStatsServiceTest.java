@@ -42,7 +42,7 @@ class UserCategoryStatsServiceTest {
                         .id(1L).build(),
                 ENTERTAINMENT,
                 TEN,
-                LocalDate.of(2026, FEBRUARY, 1)
+                LocalDate.of(2026, FEBRUARY, 1), "1234"
         );
     }
 
@@ -86,7 +86,7 @@ class UserCategoryStatsServiceTest {
         log.info("userCategoryStats = {}", result);
         assertNotNull(result);
         assertEquals(result.getCategory(), arrange.getCategory());
-        assertEquals(2,  result.getCountSpendInMonth());
+        assertEquals(2, result.getCountSpendInMonth());
         assertEquals(BigDecimal.valueOf(20), result.getTotalSpend());
         assertEquals(LocalDate.of(2026, 2, 28), result.getSpendPeriod());
     }

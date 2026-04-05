@@ -5,14 +5,14 @@
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <changeSet id="20260113_1544_create_refresh_token.xml" author="gilma">
-    <sql>
-        create table if not exists refresh_token(
+        <sql>
+            create table if not exists refresh_token(
             id bigserial primary key,
             token_hash varchar(250),
             created_at timestamp,
             status varchar(100),
             family_id bigint references token_family(id)
-        )
-    </sql>
+            )
+        </sql>
     </changeSet>
 </databaseChangeLog>

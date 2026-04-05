@@ -8,25 +8,25 @@
         <sql>
             create table if not exists exchange_rate
             (
-                id
-                bigserial
-                primary
-                key,
-                base_currency
-                varchar
+            id
+            bigserial
+            primary
+            key,
+            base_currency
+            varchar
             (
-                100
+            100
             ),
-                target_currency varchar
+            target_currency varchar
             (
-                100
+            100
             ),
-                rate numeric
+            rate numeric
             (
-                9,
-                2
+            9,
+            2
             )
-                )
+            )
         </sql>
     </changeSet>
 </databaseChangeLog>

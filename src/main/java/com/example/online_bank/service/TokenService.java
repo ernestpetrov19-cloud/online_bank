@@ -43,7 +43,7 @@ public class TokenService {
         return jwtFactoryOrchestrator.createJwt(REFRESH, userContainer);
     }
 
-    public Map<String, Object> getRefreshTokenWithDate(UserContainer userContainer){
+    public Map<String, Object> getRefreshTokenWithDate(UserContainer userContainer) {
         return refreshTokenFactory.createRefreshToken(REFRESH, userContainer);
     }
 
@@ -86,6 +86,7 @@ public class TokenService {
         log.info("tokens {}", tokens);
         return tokens;
     }
+
     private void putRefreshTokenToResponse(AuthenticationResponseDto tokens, String refreshToken) {
         tokens.tokens().put("refreshToken", refreshToken);
     }

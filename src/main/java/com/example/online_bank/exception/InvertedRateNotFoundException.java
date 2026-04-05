@@ -3,5 +3,5 @@ package com.example.online_bank.exception;
 import lombok.experimental.StandardException;
 
 @StandardException
-public class InvertedRateNotFound extends ExchangeRateException {
+public class InvertedRateNotFoundException extends ExchangeRateException {
 }

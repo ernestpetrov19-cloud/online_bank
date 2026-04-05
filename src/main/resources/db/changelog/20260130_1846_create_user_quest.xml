@@ -7,11 +7,11 @@
     <changeSet id="20260130_1846_create_user_quest.xml" author="agilmanov">
         <sql>
             create table if not exists
-                user_quest(
-                id bigserial primary key,
-                user_id bigint references user_bank(id),
-                quest_id bigint references quest(id),
-                is_complete boolean default false
+            user_quest(
+            id bigserial primary key,
+            user_id bigint references user_bank(id),
+            quest_id bigint references quest(id),
+            is_complete boolean default false
             )
         </sql>
     </changeSet>

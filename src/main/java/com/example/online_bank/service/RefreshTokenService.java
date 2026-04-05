@@ -61,13 +61,13 @@ public class RefreshTokenService {
         refreshTokenRepository.save(refreshToken);
     }
 
-    public RefreshToken findByUUidHash(String hashUuid){
+    public RefreshToken findByUUidHash(String hashUuid) {
         return refreshTokenRepository.findByUuidHash(hashUuid).orElseThrow(EntityNotFoundException::new);
     }
 
     public void revokeAllByFamily(TokenFamily family) {
         List<RefreshToken> tokens = refreshTokenRepository.findAllByFamily(family);
-        tokens.forEach(token ->{
+        tokens.forEach(token -> {
             token.setRevokedAt(LocalDateTime.now());
             token.setStatus(TokenStatus.REVOKED);
             refreshTokenRepository.save(token);

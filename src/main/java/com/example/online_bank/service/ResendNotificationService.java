@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
-@Service("resenService")
+@Service("resendService")
 @Primary
 public class ResendNotificationService implements NotificationService {
     public static final String SENDER = "onboarding@resend.dev";
@@ -16,6 +16,7 @@ public class ResendNotificationService implements NotificationService {
     private String apikey;
     private final static String EMAIL_SUBJECT = "Код подтверждения";
     private final static String BODY_TEXT = "Ваш код подтверждения регистрации: ";
+
     /**
      * @param to
      * @param verificationCode

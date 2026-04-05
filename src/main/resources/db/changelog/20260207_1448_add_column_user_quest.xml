@@ -5,8 +5,8 @@
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <changeSet id="20260207_1448_add_column_user_quest" author="admin">
-    <addColumn tableName="user_quest">
-        <column name="user_progress" type="int"> </column>
-    </addColumn>
+        <addColumn tableName="user_quest">
+            <column name="user_progress" type="int"></column>
+        </addColumn>
     </changeSet>
 </databaseChangeLog>

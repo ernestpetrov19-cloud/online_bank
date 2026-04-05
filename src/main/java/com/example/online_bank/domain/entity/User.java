@@ -82,7 +82,7 @@ public class User {
     private List<Role> roles;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "user",orphanRemoval = true, fetch = LAZY)
+    @OneToMany(mappedBy = "user", orphanRemoval = true, fetch = LAZY)
     private List<TrustedDevice> trustedDevice;
 
     @ToString.Exclude
@@ -91,7 +91,7 @@ public class User {
 
     @ToString.Exclude
     @OneToMany(mappedBy = "user", fetch = LAZY)
-    private List<UserCategoryStats>  userCategoryStats;
+    private List<UserCategoryStats> userCategoryStats;
 
     @ToString.Exclude
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")

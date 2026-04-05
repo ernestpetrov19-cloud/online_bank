@@ -40,8 +40,8 @@ public class TrustedDeviceService {
      */
     public void checkExistTrustedDevice(String email, String deviceId, User user) {
         if (!existsByDeviceIdAndUser_email(deviceId, email)) {
-           verifiedCodeService.regenerateOtp(new RegenerateOtpDto(email));
-           log.info("Была попытка входа с нового устройства. Отправляю отп");
+            verifiedCodeService.regenerateOtp(new RegenerateOtpDto(email));
+            log.info("Была попытка входа с нового устройства. Отправляю отп");
             throw new DeviceNotFoundException("Подтвердите вход с помощью проверочного кода");
         }
     }

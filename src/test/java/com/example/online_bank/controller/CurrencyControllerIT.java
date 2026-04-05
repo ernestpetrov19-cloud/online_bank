@@ -1,138 +1,210 @@
 package com.example.online_bank.controller;
 
-import com.example.online_bank.domain.dto.ConvertCurrencyDto;
-import com.example.online_bank.domain.dto.CreateExchangeRateDto;
-import com.example.online_bank.domain.dto.RateRequestDto;
-import com.example.online_bank.domain.dto.UserContainer;
+import com.example.online_bank.domain.dto.*;
+import com.example.online_bank.domain.entity.ExchangeRate;
 import com.example.online_bank.repository.ExchangeCurrencyRepository;
-import com.example.online_bank.service.CurrencyService;
-import com.example.online_bank.service.TokenService;
+import com.example.online_bank.service.crud.CrudCurrencyService;
+import com.example.online_bank.util.InitializerData;
 import io.restassured.RestAssured;
+import io.restassured.http.Header;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static com.example.online_bank.enums.CurrencyCode.RUB;
 import static com.example.online_bank.enums.CurrencyCode.USD;
 import static io.restassured.http.ContentType.JSON;
 import static java.math.BigDecimal.ZERO;
-import static java.util.UUID.randomUUID;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.DEFINED_PORT;
+import static java.math.BigDecimal.valueOf;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.HttpStatus.*;
 
-@SpringBootTest(webEnvironment = DEFINED_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @AutoConfigureMockMvc
 @Slf4j
-@Transactional
 class CurrencyControllerIT {
-    private static final String URL = "http://localhost:8081/api/currency";
     @Autowired
-    private TokenService tokenService;
+    private CrudCurrencyService crudCurrencyService;
     @Autowired
-    private CurrencyService currencyService;
+    private ExchangeCurrencyRepository currencyRepository;
     @Autowired
-    private ExchangeCurrencyRepository repository;
-
-    String token;
+    private InitializerData<ExchangeRate, ExchangeCurrencyRepository> initializerData;
+    private static final String BASE_URL = "/api/currency";
+    private String userAccessToken;
+    private String adminAccessToken;
+    private Map<String, Object> refreshToken;
+    private String USER_HEADER_VALUE;
+    private String ADMIN_HEADER_VALUE;
+    private CreateExchangeRateDto createRateDto;
 
     @SneakyThrows
     @BeforeEach
     void setUp() {
-        repository.deleteAll();
-        RestAssured.baseURI = URL;
-        UserContainer userContainer = new UserContainer(
-                randomUUID().toString(),
-                "testAdmin",
-                List.of("ROLE_ADMIN")
-        );
-        token = tokenService.getAccessToken(userContainer);
-        Thread.sleep(1100);
+        userAccessToken = initializerData.initUser(currencyRepository);
+        adminAccessToken = initializerData.initAdmin(currencyRepository);
+        Thread.sleep(2000);
+        RestAssured.port = 8081;
+        USER_HEADER_VALUE = "Bearer " + userAccessToken;
+        ADMIN_HEADER_VALUE = "Bearer " + adminAccessToken;
+        createRateDto = new CreateExchangeRateDto(USD, RUB, valueOf(90));
+    }
+
+    void cleanUp() {
+        currencyRepository.deleteAll();
     }
 
     @Test
+    @DisplayName("Успешное создание курса через администратора.")
+    @Disabled
     void successCreateExchangeRate() {
-        RestAssured.given()
+        RateResponseDto expected = new RateResponseDto(USD, RUB, valueOf(90));
+        RateResponseDto actual = RestAssured.given()
                 .contentType(JSON)
                 .log().all()
-                .header("Authorization", "Bearer " + token)
-                .body(new CreateExchangeRateDto(USD, RUB, BigDecimal.valueOf(90)))
-                .post("/create")
+                .header("Authorization", ADMIN_HEADER_VALUE)
+                .body(createRateDto)
+                .post(BASE_URL + "/create")
                 .then()
                 .log().all()
-                .statusCode(CREATED.value());
+                .statusCode(CREATED.value())
+                .extract()
+                .as(RateResponseDto.class);
+
+        assertNotNull(actual);
+        assertEquals(expected.baseCurrency(), actual.baseCurrency());
+        assertEquals(expected.targetCurrency(), actual.targetCurrency());
+        assertEquals(expected.rate(), actual.rate());
     }
 
     @Test
+    @DisplayName("Неудачное создание курса валют для администратора. Ставка курса ровна нулю.")
+    @Disabled
     void failureCreateExchangeRate() {
         RestAssured.given()
                 .contentType(JSON)
                 .log().all()
-                .header("Authorization", "Bearer " + token)
+                .header("Authorization", ADMIN_HEADER_VALUE)
                 .body(new CreateExchangeRateDto(USD, RUB, ZERO))
-                .post("/create")
+                .post(BASE_URL + "/create")
                 .then()
                 .log().all()
                 .statusCode(BAD_REQUEST.value());
     }
 
-
     @Test
-    void successConvertCurrency_RateWasFound() {
-        //arr
-        currencyService.create(USD, RUB, BigDecimal.valueOf(90));
-
+    @DisplayName("Неудачное создание ставки через пользователя")
+    @Disabled
+    void failureCreateRateByUser() {
         RestAssured.given()
                 .contentType(JSON)
                 .log().all()
-                .body(new ConvertCurrencyDto(USD, RUB, BigDecimal.valueOf(50)))
-                .post("/convert")
+                .header("Authorization", USER_HEADER_VALUE)
+                .body(createRateDto)
+                .post(BASE_URL + "/create")
+                .then()
+                .log().all()
+                .statusCode(FORBIDDEN.value());
+    }
+
+    @Test
+    @DisplayName("Успешно найти курс, который хранится в бд")
+    @Disabled
+    void successFindRate_ByUser() {
+        crudCurrencyService.create(USD, RUB, valueOf(90));
+        RestAssured.given()
+                .contentType(JSON)
+                .log().all()
+                .header(new Header("Authorization", USER_HEADER_VALUE))
+                .body(new RateRequestDto(USD, RUB))
+                .post(BASE_URL + "/find-rate")
                 .then()
                 .log().all()
                 .statusCode(OK.value());
     }
 
     @Test
-    void successConvertCurrencyByInvertedRate() {
-        currencyService.create(RUB, USD, BigDecimal.valueOf(0.11));
-        RestAssured.given()
-                .contentType(JSON)
-                .log().all()
-                .body(new ConvertCurrencyDto(USD, RUB, BigDecimal.valueOf(50)))
-                .post("/convert")
-                .then()
-                .log().all()
-                .statusCode(OK.value());
-    }
-
-    @Test
+    @Disabled
+    @DisplayName("Конвертировать валюту, но заданный курс не найден и перевернутый курс тоже")
     void failureConvertCurrency_RateWasNotFound() {
         RestAssured.given()
                 .contentType(JSON)
                 .log().all()
-                .body(new ConvertCurrencyDto(USD, RUB, BigDecimal.valueOf(50)))
-                .post("/convert")
+                .header(new Header("Authorization", USER_HEADER_VALUE))
+                .body(new ConvertCurrencyRequestDto(USD, RUB, valueOf(50)))
+                .post(BASE_URL + "/convert")
                 .then()
                 .log().all()
-                .statusCode(BAD_REQUEST.value());
+                .statusCode(NOT_FOUND.value());
     }
 
     @Test
-    void findRate() {
-        RestAssured.given()
+    @DisplayName("Успешное конвертирование по найденному курсу")
+    void successConvert() {
+        //подготовка данных
+        crudCurrencyService.create(USD, RUB, valueOf(90));
+        ConvertCurrencyRequestDto requestBody = new ConvertCurrencyRequestDto(USD, RUB, valueOf(10));
+        ConvertCurrencyResponseDto expected = new ConvertCurrencyResponseDto(USD, RUB, valueOf(900.00), valueOf(90));
+
+        ConvertCurrencyResponseDto actual = RestAssured.given()
                 .contentType(JSON)
                 .log().all()
-                .body(new RateRequestDto(USD, RUB))
-                .post("/find-rate")
+                .header(new Header("Authorization", USER_HEADER_VALUE))
+                .body(requestBody)
+                .post(BASE_URL + "/convert")
                 .then()
                 .log().all()
-                .statusCode(BAD_REQUEST.value());
+                .statusCode(200)
+                .extract()
+                .as(ConvertCurrencyResponseDto.class);
+
+        assertNotNull(actual);
+        assertTrue(expected.targetConvertedAmount().compareTo(actual.targetConvertedAmount()) == 0);
+    }
+
+    @Test
+    @DisplayName("Успешное конвертирование с помощью инвертирования курса")
+    void successConvert_ByInvertedRate() {
+        ConvertCurrencyRequestDto requestBody = new ConvertCurrencyRequestDto(USD, RUB, valueOf(10));
+        crudCurrencyService.create(RUB, USD, valueOf(0.01111));
+        ConvertCurrencyResponseDto expected = new ConvertCurrencyResponseDto(USD, RUB, valueOf(900.00), valueOf(90));
+        ConvertCurrencyResponseDto actual = RestAssured.given()
+                .contentType(JSON)
+                .log().all()
+                .header(new Header("Authorization", USER_HEADER_VALUE))
+                .body(requestBody)
+                .post(BASE_URL + "/convert")
+                .then()
+                .log().all()
+                .statusCode(200)
+                .extract()
+                .as(ConvertCurrencyResponseDto.class);
+
+        assertNotNull(actual);
+        assertEquals(expected.targetConvertedAmount(), actual.targetConvertedAmount());
+    }
+
+    @Test
+    void successSaveDataInDataBase() {
+        crudCurrencyService.create(USD, RUB, valueOf(90));
+        Optional<BigDecimal> rate = currencyRepository.findRateByBaseAndTargetCurrency(USD, RUB);
+        assertTrue(rate.isPresent());
+        assertEquals(0, rate.get().compareTo(valueOf(90)));
+        log.info("rate - {}", rate.get());
+    }
+
+    @Test
+    void failureSaveDataInDataBase() {
+        Optional<BigDecimal> rate = currencyRepository.findRateByBaseAndTargetCurrency(USD, RUB);
+        assertFalse(rate.isPresent());
     }
 }

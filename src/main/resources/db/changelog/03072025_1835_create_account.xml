@@ -8,27 +8,27 @@
         <sql>
             create table if not exists account
             (
-                id
-                bigserial
-                primary
-                key,
-                holder_id
-                bigint
-                references
-                user_bank
+            id
+            bigserial
+            primary
+            key,
+            holder_id
+            bigint
+            references
+            user_bank
             (
-                id
+            id
             ),
-                account_number varchar
+            account_number varchar
             (
-                100
+            100
             ),
-                currency_code varchar
+            currency_code varchar
             (
-                100
+            100
             ),
-                is_blocked boolean default false
-                )
+            is_blocked boolean default false
+            )
         </sql>
     </changeSet>
 </databaseChangeLog>

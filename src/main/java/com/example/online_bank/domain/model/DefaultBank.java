@@ -9,8 +9,7 @@ import org.springframework.stereotype.Component;
 public class DefaultBank extends AbstractBank {
     public DefaultBank(
             @Value("${default-bank.bank.name}") String name,
-            @Value("${default-bank.bank.partner.prefix-url}") String prefixUrl
-    ) {
+            @Value("${default-bank.bank.partner.prefix-url}") String prefixUrl) {
         super(name, prefixUrl);
     }
 }

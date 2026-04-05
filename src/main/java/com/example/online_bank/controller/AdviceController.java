@@ -50,7 +50,6 @@ public class AdviceController {
         return new ResponseEntity<>(e.getMessage(), CONFLICT);
     }
 
-
     /**
      * @param e обработка ошибки при нулевом балансе
      * @return 400 HTTP статус
@@ -141,5 +140,10 @@ public class AdviceController {
         response.put("message", e.getMessage());
         response.put("action", "VERIFY_REQUIRED");
         return ResponseEntity.status(FORBIDDEN).body(response);
+    }
+
+    @ExceptionHandler(InvertedRateNotFoundException.class)
+    public ResponseEntity<String> handleInvertedRateNotFoundException(Exception e) {
+        return ResponseEntity.status(NOT_FOUND).body(e.getMessage());
     }
 }

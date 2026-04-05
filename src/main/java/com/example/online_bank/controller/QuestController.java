@@ -29,7 +29,7 @@ public class QuestController {
     }
 
     @GetMapping("/get-user")
-    public ResponseEntity<List<UserQuestWithProgress>> findAllUserQuest(@AuthenticationPrincipal JwtUserDetails userDetails){
-       return ResponseEntity.ok( questService.findAllByUserQuest(UUID.fromString(userDetails.getUuid())));
+    public ResponseEntity<List<UserQuestWithProgress>> findAllUserQuest(@AuthenticationPrincipal JwtUserDetails userDetails) {
+        return ResponseEntity.ok(questService.findAllByUserQuest(UUID.fromString(userDetails.getUuid())));
     }
 }

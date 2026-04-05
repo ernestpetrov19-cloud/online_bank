@@ -1,6 +1,6 @@
 package com.example.online_bank.service;
 
-import com.example.online_bank.domain.dto.ConvertCurrencyResponse;
+import com.example.online_bank.domain.dto.ConvertCurrencyResponseDto;
 import com.example.online_bank.enums.CurrencyCode;
 import com.example.online_bank.exception.CurrencyPairsNotFoundException;
 import com.example.online_bank.repository.ExchangeCurrencyRepository;
@@ -14,7 +14,7 @@ import java.util.function.BiConsumer;
 @Service
 @RequiredArgsConstructor
 public class ValidateCurrencyService {
-    private final CurrencyService currencyService;
+    private final CurrencyConversionService currencyConversionService;
     private final ExchangeCurrencyRepository exchangeCurrencyRepository;
 
     /**
@@ -32,18 +32,18 @@ public class ValidateCurrencyService {
         BigDecimal finalAmount;
         if (accountCurrencyCode.equals(selectedCurrencyCode)) {
             finalAmount = amount;
-            operationMethodReference.accept(accountNumberTo, finalAmount); //accountService.someOneOperationType(*accountNumber, amount*)
+            operationMethodReference.accept(accountNumberTo, finalAmount); //accountService.someOneOperationType(*accountNumber, providedAmountInBaseCurrency*)
         } else {
             if (!exchangeCurrencyRepository.existsByBaseCurrencyAndTargetCurrency(selectedCurrencyCode, accountCurrencyCode)) {
                 throw new CurrencyPairsNotFoundException("Курс не существует. Выберите другую валюту для пополнения.");
             }
 
-            ConvertCurrencyResponse convertCurrencyResponse = currencyService.convertCurrency(
+            ConvertCurrencyResponseDto convertCurrencyResponseDto = currencyConversionService.convert(
                     accountCurrencyCode,
                     selectedCurrencyCode,
                     amount
             );
-            finalAmount = convertCurrencyResponse.convertedAmount();
+            finalAmount = convertCurrencyResponseDto.targetConvertedAmount();
             operationMethodReference.accept(accountNumberTo, finalAmount);
         }
         return finalAmount;

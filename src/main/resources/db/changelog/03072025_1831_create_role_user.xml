@@ -8,22 +8,22 @@
         <sql>
             create table if not exists role_user
             (
-                id
-                bigserial
-                primary
-                key,
-                user_id
-                bigint
-                references
-                user_bank
+            id
+            bigserial
+            primary
+            key,
+            user_id
+            bigint
+            references
+            user_bank
             (
-                id
+            id
             ),
-                role_id bigint references role
+            role_id bigint references role
             (
-                id
+            id
             )
-                )
+            )
         </sql>
 
     </changeSet>

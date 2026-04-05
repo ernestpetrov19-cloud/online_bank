@@ -8,10 +8,10 @@
         <sql>
             create table if not exists token_family
             (
-                id bigserial primary key,
-                is_blocked BOOLEAN,
-                trusted_device_id bigint references trusted_device(id),
-                user_id bigint references user_bank(id)
+            id bigserial primary key,
+            is_blocked BOOLEAN,
+            trusted_device_id bigint references trusted_device(id),
+            user_id bigint references user_bank(id)
             )
         </sql>
 

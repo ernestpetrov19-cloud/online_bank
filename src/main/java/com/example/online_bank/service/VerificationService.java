@@ -35,7 +35,7 @@ public class VerificationService {
             userService.verifyEmailCode(user, dto.code(), isVerified);
             //  log.info("Очистка старых кодов");
 
-           // verifiedCodeService.cleanAllCodes(user.getId());
+            // verifiedCodeService.cleanAllCodes(user.getId());
 
             String checkedDeviceId = deviceService.getOrCreateDeviceId(dto.deviceId());
 

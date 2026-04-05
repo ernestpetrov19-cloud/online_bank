@@ -7,7 +7,7 @@
     <changeSet id="23072025_0236_add_column_verified_code.xml" author="amirgilmanov">
         <sql>
             alter table verified_code
-                add column verified_code_type varchar(10)
+            add column verified_code_type varchar(10)
         </sql>
     </changeSet>
 </databaseChangeLog>

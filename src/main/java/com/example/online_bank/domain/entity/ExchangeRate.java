@@ -32,6 +32,6 @@ public class ExchangeRate {
     @Column
     @Enumerated(STRING)
     private CurrencyCode targetCurrency;   // Валюта, от которой происходит обмен(RUB)
-    @Column
+    @Column(precision = 9, scale = 5)
     private BigDecimal rate; // цена котируемой валюты по отношению к базовой
 }

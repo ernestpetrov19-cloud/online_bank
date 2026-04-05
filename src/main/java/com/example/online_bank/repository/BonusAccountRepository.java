@@ -7,6 +7,4 @@ import java.util.Optional;
 
 public interface BonusAccountRepository extends JpaRepository<BonusAccount, Long> {
     Optional<BonusAccount> findByAccount_AccountNumber(String accountNumber);
-
-    boolean existsByAccount_AccountNumber(String accountAccountNumber);
 }

@@ -5,13 +5,13 @@
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <changeSet id="20260130_1748_create_quest.xml" author="agilmanov">
-<sql>
-    create table if not exists quest(
-        id bigserial primary key,
-        category varchar(100),
-        date_of_expiry date,
-        point_reward int
-    )
-</sql>
+        <sql>
+            create table if not exists quest(
+            id bigserial primary key,
+            category varchar(100),
+            date_of_expiry date,
+            point_reward int
+            )
+        </sql>
     </changeSet>
 </databaseChangeLog>

@@ -1,7 +1,8 @@
 package com.example.online_bank.controller;
 
 import com.example.online_bank.domain.dto.*;
-import com.example.online_bank.service.CurrencyService;
+import com.example.online_bank.service.crud.CrudCurrencyService;
+import com.example.online_bank.service.CurrencyConversionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -19,14 +20,15 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RequestMapping("/api/currency")
 @RequiredArgsConstructor
 public class CurrencyController {
-    private final CurrencyService currencyService;
+    private final CrudCurrencyService crudCurrencyService;
+    private final CurrencyConversionService currencyConversionService;
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create")
     @Operation(summary = "Создать обменный курс")
     @ApiResponse(responseCode = "201", content = @Content(mediaType = "text/plain"))
     public ResponseEntity<RateResponseDto> createExchangeRate(@RequestBody @Valid CreateExchangeRateDto dtoRequest) {
-        return ResponseEntity.status(CREATED).body(currencyService.create(
+        return ResponseEntity.status(CREATED).body(crudCurrencyService.create(
                 dtoRequest.baseCurrency(),
                 dtoRequest.targetCurrency(),
                 dtoRequest.rate()
@@ -35,13 +37,13 @@ public class CurrencyController {
 
     @PostMapping("/convert")
     @Operation(summary = "Конвертировать валюту")
-    public ConvertCurrencyResponse convertCurrency(@RequestBody ConvertCurrencyDto dtoRequest) {
-        return currencyService.convertCurrency(dtoRequest.baseCurrency(), dtoRequest.targetCurrency(), dtoRequest.amount());
+    public ConvertCurrencyResponseDto convertCurrency(@RequestBody ConvertCurrencyRequestDto dtoRequest) {
+        return currencyConversionService.convert(dtoRequest.baseCurrency(), dtoRequest.targetCurrency(), dtoRequest.providedAmountInBaseCurrency());
     }
 
     @PostMapping("/find-rate")
     @Operation(summary = "Найти курс")
-    public ConvertCurrencyResponse findRate(@RequestBody RateRequestDto dto) {
-        return currencyService.findRate(dto);
+    public RateResponseDto findRate(@RequestBody RateRequestDto dto) {
+        return crudCurrencyService.findRate(dto);
     }
 }

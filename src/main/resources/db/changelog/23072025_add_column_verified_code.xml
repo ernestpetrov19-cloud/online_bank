@@ -7,7 +7,7 @@
     <changeSet id="23072025_add_column_verified_code.xml" author="amirgilmanov">
         <sql>
             alter table verified_code
-                add column is_verified boolean
+            add column is_verified boolean
         </sql>
     </changeSet>
 </databaseChangeLog>

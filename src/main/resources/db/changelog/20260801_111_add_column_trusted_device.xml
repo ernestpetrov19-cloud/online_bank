@@ -5,10 +5,10 @@
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <changeSet id="20260801_111_add_column_trusted_device.xml" author="admin">
-    <sql>
-        alter table trusted_device
+        <sql>
+            alter table trusted_device
             add column user_agent varchar(100),
             add column created_at timestamp
-    </sql>
+        </sql>
     </changeSet>
 </databaseChangeLog>

@@ -55,9 +55,9 @@ class UserServiceTest {
                 .isVerified(false)
                 .build();
 
-        doNothing().when(verifiedCodeService).validateCode(userMock, correctOtp, EMAIL);
+        doNothing().when(verifiedCodeService).validateCode(userMock, correctOtp, EMAIL, false);
 
-        assertDoesNotThrow(() -> userService.verifyEmailCode(userMock, correctOtp));
+        assertDoesNotThrow(() -> userService.verifyEmailCode(userMock, correctOtp, false));
     }
 
     @Test
@@ -70,11 +70,11 @@ class UserServiceTest {
 
         doThrow(VerificationOtpException.class)
                 .when(verifiedCodeService)
-                .validateCode(userMock, correctOtp, EMAIL);
+                .validateCode(userMock, correctOtp, EMAIL, false);
 
         assertThrows(
                 VerificationOtpException.class,
-                () -> userService.verifyEmailCode(userMock, correctOtp));
+                () -> userService.verifyEmailCode(userMock, correctOtp, false));
         assertFalse(userMock.getIsVerified());
     }
 }

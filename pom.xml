@@ -8,29 +8,43 @@
         <version>3.3.3</version>
         <relativePath/>
     </parent>
+
     <groupId>com.example</groupId>
     <artifactId>online_bank</artifactId>
     <version>1.1.0</version>
     <name>online_bank</name>
     <description>online_bank</description>
+
     <url/>
+
     <licenses>
-        <license/>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
     </licenses>
+
     <developers>
-        <developer/>
+        <developer>
+            <id>agilmanov</id>
+            <name>Amir Gilmanov</name>
+            <url>https://github.com/amirgilmanov</url>
+            <email>gilmanovamir19@gmail.com</email>
+        </developer>
     </developers>
+
     <scm>
-        <connection/>
-        <developerConnection/>
-        <tag/>
-        <url/>
+        <url>
+            https://github.com/amirgilmanov/online_bank
+        </url>
     </scm>
     <properties>
         <java.version>21</java.version>
         <kotlin.version>2.2.0</kotlin.version>
     </properties>
     <dependencies>
+
         <!--spring aop-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -179,11 +193,16 @@
             <scope>compile</scope>
         </dependency>
 
-<!--        resend email-->
+        <!--        resend email-->
         <dependency>
             <groupId>com.resend</groupId>
             <artifactId>resend-java</artifactId>
             <version>3.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
         </dependency>
 
     </dependencies>
@@ -305,4 +324,3 @@
         </plugins>
     </build>
 </project>
-

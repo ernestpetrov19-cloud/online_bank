@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Slf4j
 public class SendOtpEventListener {
-    @Qualifier("resenService")
+    @Qualifier("resendService")
     private final NotificationService notificationService;
 
     @EventListener

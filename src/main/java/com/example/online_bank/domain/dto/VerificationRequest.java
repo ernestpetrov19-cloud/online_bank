@@ -6,10 +6,10 @@ import jakarta.validation.constraints.NotBlank;
 /**
  * Этот объект представляет собой запрос на аутентификацию. Используется в аутентификации по электронной почте
  *
- * @param email Электронная почта
- * @param code  Код подтверждения
+ * @param email      Электронная почта
+ * @param code       Код подтверждения
  * @param deviceName имя устройства
- * @param userAgent средство откуда использовано
+ * @param userAgent  средство откуда использовано
  */
 public record VerificationRequest(
         @Schema(description = "Почта", example = "example@gmail.com")

@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260124132200_add_column_refresh_token.yaml
+      author: gilmanovamir
+      changes:
+        - addColumn:
+            tableName: refresh_token
+            columns:
+              - column:
+                  name: expires_at
+                  type: timestamp
+              - column:
+                  name: revoked_at
+                  type: timestamp

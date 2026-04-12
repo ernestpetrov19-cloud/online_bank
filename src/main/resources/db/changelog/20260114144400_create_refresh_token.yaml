@@ -1,0 +1,31 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260114144400_create_refresh_token.yaml
+      author: amirgilmanov
+      changes:
+        - createTable:
+            tableName: refresh_token
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: token_hash
+                  type: varchar(250)
+              - column:
+                  name: created_at
+                  type: timestamp
+              - column:
+                  name: status
+                  type: varchar(100)
+              - column:
+                  name: family_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: fk_refresh_token_token_family
+                    referencedTableName: token_family
+                    referencedColumnNames: id

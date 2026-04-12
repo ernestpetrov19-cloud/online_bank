@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="20260219150320_seeding_quest.xml" author="gilmanovamir">
+        <insert tableName="quest">
+            <column name="category" value="FOOD"/>
+            <column name="date_of_expiry" valueDate="2026-07-30"/>
+            <column name="point_reward" valueNumeric="250"/>
+            <column name="progress" valueNumeric="0"/>
+        </insert>
+        <insert tableName="quest">
+            <column name="category" value="ENTERTAINMENT"/>
+            <column name="date_of_expiry" valueDate="2026-07-30"/>
+            <column name="point_reward" valueNumeric="500"/>
+            <column name="progress" valueNumeric="0"/>
+        </insert>
+        <insert tableName="quest">
+            <column name="category" value="MEDICINE"/>
+            <column name="date_of_expiry" valueDate="2026-07-30"/>
+            <column name="point_reward" valueNumeric="300"/>
+            <column name="progress" valueNumeric="0"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

@@ -1,6 +1,6 @@
 package com.example.online_bank.service.processor;
 
-import com.example.online_bank.domain.dto.RegistrationDto;
+import com.example.online_bank.domain.dto.RegistrationDtoRequest;
 import com.example.online_bank.domain.entity.User;
 import com.example.online_bank.domain.entity.VerifiedCode;
 import com.example.online_bank.domain.event.SendOtpEvent;
@@ -9,7 +9,6 @@ import com.example.online_bank.mapper.UserMapper;
 import com.example.online_bank.service.RoleService;
 import com.example.online_bank.service.UserService;
 import com.example.online_bank.service.VerifiedCodeService;
-import com.example.online_bank.util.CodeGeneratorUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.function.TriFunction;
@@ -17,9 +16,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 import static com.example.online_bank.enums.VerifiedCodeType.EMAIL;
+import static com.example.online_bank.util.CodeGeneratorUtil.generateOtp;
 
 @Service
 @RequiredArgsConstructor
@@ -32,24 +31,24 @@ public class RegistrationProcessor {
     private final UserMapper userMapper;
 
     public SendOtpEvent register(
-            RegistrationDto registrationDto,
-            TriFunction<RegistrationDto, RoleService, BCryptPasswordEncoder, User> mapper) {
+            RegistrationDtoRequest registrationDtoRequest,
+            TriFunction<RegistrationDtoRequest, RoleService, BCryptPasswordEncoder, User> mapper) {
 
-        if (userService.existsByPhoneNumber(registrationDto.phone()) ||
-                userService.existsByEmail(registrationDto.email())) {
+        if (userService.existsByPhoneNumber(registrationDtoRequest.phone())
+                || userService.existsByEmail(registrationDtoRequest.email())) {
             log.warn("Номер или почта уже используется");
             throw new EntityAlreadyExistsException("Пользователь с таким номером или почтой уже зарегистрирован");
         }
 
-        User user = mapper.apply(registrationDto, roleService, bCryptPasswordEncoder);
+        User user = mapper.apply(registrationDtoRequest, roleService, bCryptPasswordEncoder);
         userService.save(user);
 
-        String code = CodeGeneratorUtil.generateOtp();
+        String code = generateOtp();
         LocalDateTime expireDate = verifiedCodeService.createExpirationDate(200);
         VerifiedCode verifiedCode = verifiedCodeService.createVerifiedCode(code, user, expireDate, EMAIL);
         verifiedCodeService.save(verifiedCode);
 
-        log.info("Завершение регистрации");
-        return userMapper.toRegistrationDtoResponse(registrationDto, code);
+        log.trace("Завершение регистрации");
+        return userMapper.toSendOtpEvent(registrationDtoRequest, code);
     }
 }

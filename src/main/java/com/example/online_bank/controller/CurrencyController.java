@@ -38,7 +38,11 @@ public class CurrencyController {
     @PostMapping("/convert")
     @Operation(summary = "Конвертировать валюту")
     public ConvertCurrencyResponseDto convertCurrency(@RequestBody ConvertCurrencyRequestDto dtoRequest) {
-        return currencyConversionService.convert(dtoRequest.baseCurrency(), dtoRequest.targetCurrency(), dtoRequest.providedAmountInBaseCurrency());
+        return currencyConversionService.convert(
+                dtoRequest.baseCurrency(),
+                dtoRequest.targetCurrency(),
+                dtoRequest.providedAmountInBaseCurrency()
+        );
     }
 
     @PostMapping("/find-rate")

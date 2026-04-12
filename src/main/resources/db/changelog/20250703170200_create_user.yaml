@@ -1,0 +1,51 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20250703170200_create_user.xml
+      author: gilmanovamir
+      changes:
+        - createTable:
+            tableName: user_bank
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: uuid
+                  type: varchar(100)
+              - column:
+                  name: phone_number
+                  type: varchar(100)
+                  constraints:
+                    unique: true
+              - column:
+                  name: email
+                  type: varchar(100)
+                  constraints:
+                    unique: true
+              - column:
+                  name: password_hash
+                  type: varchar(256)
+              - column:
+                  name: failed_attempts
+                  type: int
+                  defaultValue: '0'
+              - column:
+                  name: is_blocked
+                  type: boolean
+                  defaultValueBoolean: false
+              - column:
+                  name: block_expired_at
+                  type: timestamp
+              - column:
+                  name: name
+                  type: varchar(100)
+              - column:
+                  name: surname
+                  type: varchar(100)
+              - column:
+                  name: patronymic
+                  type: varchar(100)

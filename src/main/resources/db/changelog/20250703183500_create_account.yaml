@@ -1,0 +1,32 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20250703183500_create_account.yaml
+      author: amirgilmanov
+      changes:
+        - createTable:
+            tableName: account
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: holder_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: fk_account_user
+                    referencedTableName: user_bank
+                    referencedColumnNames: id
+              - column:
+                  name: account_number
+                  type: varchar(100)
+              - column:
+                  name: currency_code
+                  type: varchar(100)
+              - column:
+                  name: is_blocked
+                  type: boolean
+                  defaultValueBoolean: false

@@ -1,0 +1,28 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260128201900_create_bank_parther.yaml
+      author: gilmanovamir
+      changes:
+        - createTable:
+            tableName: bank_partner
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: varchar(100)
+              - column:
+                  name: partner_category
+                  type: varchar(100)
+              - column:
+                  name: account_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: fk_bank_parthner_account
+                    referencedTableName: account
+                    referencedColumnNames: id

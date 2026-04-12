@@ -1,0 +1,28 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260208165100_create_bonus_account.yaml
+      author: gilma
+      changes:
+        - createTable:
+            tableName: bonus_account
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: points
+                  type: numeric(9,2)
+                  defaultValueNumeric: "0"
+              - column:
+                  name: account_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: fk_bonus_account_account
+                    unique: true
+                    referencedTableName: account
+                    referencedColumnNames: id
+                    deleteCascade: true

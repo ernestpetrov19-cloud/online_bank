@@ -1,6 +1,6 @@
 package com.example.online_bank.service;
 
-import com.example.online_bank.domain.dto.RegistrationDto;
+import com.example.online_bank.domain.dto.RegistrationDtoRequest;
 import com.example.online_bank.domain.event.SendOtpEvent;
 import com.example.online_bank.mapper.UserMapper;
 import com.example.online_bank.service.processor.RegistrationProcessor;
@@ -18,14 +18,14 @@ public class RegistrationService {
     private final EventPublisherService<SendOtpEvent> eventPublisherService;
 
     @Transactional
-    public void signUp(RegistrationDto registrationDto) {
-        SendOtpEvent event = registrationProcessor.register(registrationDto, userMapper::toUser);
+    public void signUp(RegistrationDtoRequest registrationDtoRequest) {
+        SendOtpEvent event = registrationProcessor.register(registrationDtoRequest, userMapper::toUser);
         eventPublisherService.publishEvent(event);
     }
 
     @Transactional
-    public void adminSignUp(RegistrationDto registrationDto) {
-        SendOtpEvent event = registrationProcessor.register(registrationDto, userMapper::toUserAdmin);
+    public void adminSignUp(RegistrationDtoRequest registrationDtoRequest) {
+        SendOtpEvent event = registrationProcessor.register(registrationDtoRequest, userMapper::toAdmin);
         eventPublisherService.publishEvent(event);
     }
 }

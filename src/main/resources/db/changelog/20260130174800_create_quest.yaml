@@ -1,0 +1,24 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260130174800_create_quest.yaml
+      author: amirgilmanov
+      changes:
+        - createTable:
+            tableName: quest
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: category
+                  type: varchar(100)
+              - column:
+                  name: date_of_expiry
+                  type: date
+              - column:
+                  name: point_reward
+                  type: int

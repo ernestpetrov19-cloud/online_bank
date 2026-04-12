@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import static jakarta.persistence.CascadeType.ALL;
+import static jakarta.persistence.CascadeType.REMOVE;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
@@ -65,11 +65,11 @@ public class User {
     private Boolean isVerified;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "holder", cascade = ALL, orphanRemoval = true, fetch = LAZY)
+    @OneToMany(mappedBy = "holder", cascade = REMOVE, orphanRemoval = true, fetch = LAZY)
     private List<Account> accounts;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "user", fetch = LAZY)
+    @OneToMany(mappedBy = "user", fetch = LAZY, cascade = REMOVE)
     private List<VerifiedCode> verifiedCode;
 
     @ManyToMany()
@@ -82,18 +82,18 @@ public class User {
     private List<Role> roles;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "user", orphanRemoval = true, fetch = LAZY)
+    @OneToMany(mappedBy = "user", orphanRemoval = true, fetch = LAZY, cascade = REMOVE)
     private List<TrustedDevice> trustedDevice;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "user", fetch = LAZY)
+    @OneToMany(mappedBy = "user", fetch = LAZY, cascade = REMOVE)
     private List<TokenFamily> tokenFamilies;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "user", fetch = LAZY)
+    @OneToMany(mappedBy = "user", fetch = LAZY, cascade = REMOVE)
     private List<UserCategoryStats> userCategoryStats;
 
     @ToString.Exclude
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    @OneToMany(fetch = LAZY, mappedBy = "user", cascade = REMOVE)
     private List<UserQuest> userQuest;
 }

@@ -1,0 +1,28 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260108085300_create_trusted_device.yaml
+      author: amirgilmanov
+      changes:
+        - createTable:
+            tableName: trusted_device
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: device_name
+                  type: varchar(250)
+              - column:
+                  name: device_id
+                  type: varchar(250)
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: fk_trusted_device_user
+                    referencedTableName: user_bank
+                    referencedColumnNames: id

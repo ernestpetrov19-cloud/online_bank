@@ -30,22 +30,22 @@ public class AccessTokenFactory implements TokenFactory {
      */
     @Override
     public String createToken(TokenType type, UserContainer userContainer) {
-        log.info("Create access token");
+        log.debug("Create access token");
 
-        log.info("Создание дат");
+        log.trace("Создание дат");
         Date issuedDate = new Date();
         // Date notBeforeDate = new Date(issuedDate.getTime() + config.getNotBeforeTime().toMillis());
         Date notBeforeDate = issuedDate;
         Date expiredDate = new Date(issuedDate.getTime() + config.getAccessTokenLifetime().toMillis());
 
-        log.info("Получение uuid пользователя");
+        log.trace("Получение uuid пользователя");
         String subject = userContainer.uuid();
         log.trace("Получение ролей пользователя");
         List<String> subjectRoles = userContainer.roles();
 
         Map<String, Object> claims = jwtService.createClaims();
 
-        log.info("Помещаем значения в клаймы");
+        log.trace("Помещаем значения в клаймы");
         claims.put("roles", subjectRoles);
         claims.put("token_type", type);
         claims.put("name", userContainer.name());
@@ -65,17 +65,12 @@ public class AccessTokenFactory implements TokenFactory {
                 .claims(claims)
                 .issuedAt(issuedDate)
                 .compact();
-        System.out.println(token);
 
         //todo сделать тестовые логи
         log.info("access token created {}", token);
         return token;
     }
 
-    /**
-     * @param supported
-     * @return
-     */
     @Override
     public boolean supports(TokenType supported) {
         return supported == ACCESS;

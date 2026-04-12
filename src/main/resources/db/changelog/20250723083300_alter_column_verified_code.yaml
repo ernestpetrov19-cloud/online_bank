@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20250723083300_alter_column_verified_code.yaml
+      author: amirgilmanov
+      changes:
+        - renameColumn:
+            tableName: verified_code
+            oldColumnName: verified_code_type
+            newColumnName: code_type

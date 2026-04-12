@@ -11,13 +11,13 @@ spring:
     allow-bean-definition-overriding: true
 
   liquibase:
-    enabled: false
+    enabled: true
     change-log: classpath:/db/changelog/db.changelog-master.yaml
 
   jpa:
     hibernate:
       show-sql: true
-      ddl-auto: create-drop
+      ddl-auto: validate
     defer-datasource-initialization: false
 
   datasource:
@@ -47,7 +47,7 @@ logging:
   level:
     org:
       hibernate:
-        SQL: DEBUG
+        SQL: trace
         orm:
           jdbc:
             bind: TRACE
@@ -62,7 +62,7 @@ jwt:
 
 app:
   cors:
-    allowed-origins: test-url
+    allowed-origins: ${CORS_URL}
 
 resend:
-  api-key: resend-key
+  api-key: ${RESEND_API_KEY}

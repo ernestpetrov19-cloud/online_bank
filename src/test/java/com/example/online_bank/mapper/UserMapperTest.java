@@ -1,10 +1,10 @@
 package com.example.online_bank.mapper;
 
-import com.example.online_bank.domain.dto.RegistrationDto;
-import com.example.online_bank.domain.event.SendOtpEvent;
+import com.example.online_bank.domain.dto.RegistrationDtoRequest;
 import com.example.online_bank.domain.dto.UserContainer;
 import com.example.online_bank.domain.entity.Role;
 import com.example.online_bank.domain.entity.User;
+import com.example.online_bank.domain.event.SendOtpEvent;
 import com.example.online_bank.service.RoleService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,13 +26,13 @@ public class UserMapperTest {
     private final UserMapperImpl userMapper = new UserMapperImpl();
     private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
     private final RoleService roleService = Mockito.mock(RoleService.class);
-    private RegistrationDto registrationDto;
+    private RegistrationDtoRequest registrationDtoRequest;
     private User user;
     private String uuidStr;
 
     @BeforeEach
     void setUp() {
-        registrationDto = new RegistrationDto(
+        registrationDtoRequest = new RegistrationDtoRequest(
                 "Test",
                 "TestSurname",
                 "TestPatronymic",
@@ -70,7 +70,7 @@ public class UserMapperTest {
         Mockito.when(roleService.findRoleByName("ROLE_USER")).thenReturn(new Role(1L, "ROLE_USER"));
 
         //Сверяем данные
-        User user = userMapper.toUser(registrationDto, roleService, bCryptPasswordEncoder);
+        User user = userMapper.toUser(registrationDtoRequest, roleService, bCryptPasswordEncoder);
         log.info(user.toString());
         assertNotNull(user);
         assertNotNull(user.getUuid());
@@ -83,14 +83,15 @@ public class UserMapperTest {
         assertFalse(user.getIsBlocked());
         assertFalse(user.getIsVerified());
         assertArrayEquals(roles.toArray(), user.getRoles().toArray());
+        //verify(bCryptPasswordEncoder).encode(registrationDtoRequest.password());
     }
 
     @Test
-    void successMapToUserAdmin() {
+    void successMapToAdmin() {
         List<Role> roles = List.of(new Role(1L, "ROLE_ADMIN"));
         Mockito.when(roleService.findRoleByName("ROLE_ADMIN")).thenReturn(new Role(1L, "ROLE_ADMIN"));
 
-        User userAdmin = userMapper.toUserAdmin(registrationDto, roleService, bCryptPasswordEncoder);
+        User userAdmin = userMapper.toAdmin(registrationDtoRequest, roleService, bCryptPasswordEncoder);
         assertNotNull(userAdmin);
         assertNotNull(userAdmin.getUuid());
         assertEquals("Test", userAdmin.getName());
@@ -102,13 +103,14 @@ public class UserMapperTest {
         assertFalse(userAdmin.getIsBlocked());
         assertFalse(userAdmin.getIsVerified());
         assertArrayEquals(roles.toArray(), userAdmin.getRoles().toArray());
+        //verify(bCryptPasswordEncoder).encode(registrationDtoRequest.password());
     }
 
     @Test
     @DisplayName("Успешное конвертирование в registrationDtoResponse")
-    void successfulMapToRegistrationDtoResponse() {
+    void successfulMapToSendOtpEvent() {
         String code = "1234";
-        SendOtpEvent sendOtpEvent = userMapper.toRegistrationDtoResponse(registrationDto, code);
+        SendOtpEvent sendOtpEvent = userMapper.toSendOtpEvent(registrationDtoRequest, code);
 
         assertEquals(code, sendOtpEvent.code());
         assertEquals("testEmail@.com", sendOtpEvent.email());

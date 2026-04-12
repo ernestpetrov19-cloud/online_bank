@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260108091100_add_column_trusted_device.yaml
+      author: amirgilmanov
+      changes:
+        - addColumn:
+            tableName: trusted_device
+            columns:
+              - column:
+                  name: user_agent
+                  type: varchar(100)
+              - column:
+                  name: created_at
+                  type: timestamp

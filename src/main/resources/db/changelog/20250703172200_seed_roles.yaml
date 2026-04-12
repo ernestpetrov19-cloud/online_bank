@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20250703172200_insert_role.yaml
+      author: amirgilmanov
+      changes:
+        - insert:
+            tableName: role
+            columns:
+              - column:
+                  name: name
+                  value: ROLE_USER
+        - insert:
+            tableName: role
+            columns:
+              - column:
+                  name: name
+                  value: ROLE_ADMIN

@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20250703183100_create_role_user.yaml
+      author: amirgilmanov
+      changes:
+        - createTable:
+            tableName: role_user
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: fk_role_user_user
+                    referencedTableName: user_bank
+                    referencedColumnNames: id
+              - column:
+                  name: role_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: fk_role_user_role
+                    referencedTableName: role
+                    referencedColumnNames: id

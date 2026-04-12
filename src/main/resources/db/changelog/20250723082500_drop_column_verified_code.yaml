@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20250723082500_drop_column_verified_code.yaml
+      author: amirgilmanov
+      changes:
+        - dropColumn:
+            tableName: verified_code
+            columns:
+              - column:
+                  name: phone_number

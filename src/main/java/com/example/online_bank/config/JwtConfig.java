@@ -73,17 +73,17 @@ public class JwtConfig {
      */
     @PostConstruct
     public void initSecretKey() {
-        log.info("init secret key");
+        log.debug("init secret key");
         try {
             File file = new File(fileName);
             if (file.exists()) {
                 this.key = secretKeyManager.decodeFile(file.getName());
-                log.info("Secret key decoded successfully");
+                log.debug("Secret key decoded successfully");
             } else {
                 SecretKey secretKey = secretKeyManager.createSecretKey();
                 this.key = secretKey;
                 secretKeyManager.encodeAndWriteKey(new FileWriter(fileName), secretKey);
-                log.info("Secret key has been encoded and written");
+                log.debug("Secret key has been encoded and written");
             }
         } catch (IOException e) {
             log.error(e.getMessage());

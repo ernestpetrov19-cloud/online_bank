@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260220133300_add_column_balance.yaml
+      author: amirgilmanov
+      changes:
+        - addColumn:
+            tableName: account
+            columns:
+              - column:
+                  name: balance
+                  type: numeric (9,2)

@@ -1,0 +1,34 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260128213400_create_user_category_stat.yaml
+      author: gilmanovamir
+      changes:
+        - createTable:
+            tableName: user_category_stats
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: category
+                  type: varchar(100)
+              - column:
+                  name: total_spend
+                  type: numeric(9,2)
+              - column:
+                  name: count_spend_in_month
+                  type: int
+              - column:
+                  name: spend_period
+                  type: date
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: fk_user_category_stats_user
+                    referencedTableName: user_bank
+                    referencedColumnNames: id

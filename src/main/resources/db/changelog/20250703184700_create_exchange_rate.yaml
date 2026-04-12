@@ -1,0 +1,24 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20250703184700_create_exchange_rate.yaml
+      author: amirgilmanov
+      changes:
+        - createTable:
+            tableName: exchange_rate
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: base_currency
+                  type: varchar(100)
+              - column:
+                  name: target_currency
+                  type: varchar(100)
+              - column:
+                  name: rate
+                  type: numeric(9,2)

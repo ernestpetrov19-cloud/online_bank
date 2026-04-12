@@ -1,6 +1,6 @@
 package com.example.online_bank.util;
 
-import com.example.online_bank.domain.dto.RegistrationDto;
+import com.example.online_bank.domain.dto.RegistrationDtoRequest;
 import com.example.online_bank.domain.entity.User;
 import com.example.online_bank.service.QuestService;
 import com.example.online_bank.service.RegistrationService;
@@ -27,7 +27,7 @@ public class FillDb {
         questService.createRandomQuest();
         Optional<User> byEmail = userService.findByEmail("gilmanovamir19@gmail.com");
         if (byEmail.isEmpty()) {
-            registrationService.signUp(new RegistrationDto("a", "a", "a", "a", "1234", "gilmanovamir19@gmail.com"));
+            registrationService.signUp(new RegistrationDtoRequest("a", "a", "a", "a", "1234", "gilmanovamir19@gmail.com"));
         }
         User user = userService.findByEmail("gilmanovamir19@gmail.com").orElseThrow(RuntimeException::new);
         userQuestService.makeRelationBetweenUserAndQuest(user);

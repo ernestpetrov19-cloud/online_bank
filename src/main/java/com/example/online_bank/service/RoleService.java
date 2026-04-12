@@ -12,6 +12,12 @@ public class RoleService {
     private final RoleRepository roleRepository;
 
     public Role findRoleByName(String name) {
-        return roleRepository.findByName(name).orElseThrow(() -> new EntityNotFoundException("Role %s not found"));
+        return roleRepository.findByName(name)
+                .orElseThrow(() -> new EntityNotFoundException("Role %s not found".formatted(name)));
+    }
+
+    public void create(String roleName) {
+        Role role = Role.builder().name(roleName).build();
+        roleRepository.save(role);
     }
 }

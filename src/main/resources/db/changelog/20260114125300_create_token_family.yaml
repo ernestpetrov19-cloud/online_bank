@@ -1,0 +1,33 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260114125300_create_token_family.yaml
+      author: amirgilmanov
+      changes:
+        - createTable:
+            tableName: token_family
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: is_blocked
+                  type: boolean
+                  defaultValueBoolean: false
+              - column:
+                  name: trusted_device_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: fk_token_family_trusted_device
+                    referencedTableName: trusted_device
+                    referencedColumnNames: id
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: fk_token_family_user
+                    referencedTableName: user_bank
+                    referencedColumnNames: id

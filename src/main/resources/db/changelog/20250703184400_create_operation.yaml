@@ -1,0 +1,37 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20250703184400_create_operation.yaml
+      author: amirgilmanov
+      changes:
+        - createTable:
+            tableName: operation
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: account_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: fk_operation_account
+                    referencedTableName: account
+                    referencedColumnNames: id
+              - column:
+                  name: created_at
+                  type: timestamp
+              - column:
+                  name: operation_type
+                  type: varchar(100)
+              - column:
+                  name: amount
+                  type: numeric(9,2)
+              - column:
+                  name: description
+                  type: varchar(100)
+              - column:
+                  name: currency_code
+                  type: varchar(100)

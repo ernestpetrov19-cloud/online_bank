@@ -1,67 +1,71 @@
 databaseChangeLog:
   - include:
-      file: db/changelog/03072025_1702_create_user.xml
+      file: db/changelog/20250703170200_create_user.yaml
   - include:
-      file: db/changelog/03072025_1720_create_table_role.xml
+      file: db/changelog/20250703172000_create_table_role.yaml
   - include:
-      file: db/changelog/03072025_1722_insert_role.xml
+      file: db/changelog/20250703172200_seed_roles.yaml
   - include:
-      file: db/changelog/03072025_1831_create_role_user.xml
+      file: db/changelog/20250703183100_create_role_user.yaml
   - include:
-      file: db/changelog/03072025_1835_create_account.xml
+      file: db/changelog/20250703183500_create_account.yaml
   - include:
-      file: db/changelog/03072025_1844_create_operation.xml
+      file: db/changelog/20250703184400_create_operation.yaml
   - include:
-      file: db/changelog/03072025_1847_create_exchange_rate.xml
+      file: db/changelog/20250703184700_create_exchange_rate.yaml
   - include:
-      file: db/changelog/04072025_0008_rename_user_bank.xml
+      file: db/changelog/20250704000800_rename_user_bank.yaml
   - include:
-      file: db/changelog/04072025_change_column_type_user.xml
+      file: db/changelog/20250704000900_change_column_type_user.yaml
   - include:
-      file: db/changelog/12072025_create_verified_code.xml
+      file: db/changelog/20250712000000_create_verified_code.yaml
   - include:
-      file: db/changelog/22072025_add_column_user.xml
+      file: db/changelog/20250722000000_add_column_user.yaml
   - include:
-      file: db/changelog/23072025_add_column_verified_code.xml
+      file: db/changelog/20250723000000_add_column_verified_code.yaml
   - include:
-      file: db/changelog/23072025_0236_add_column_verified_code.xml
+      file: db/changelog/20250723023600_add_column_verfied_code.yaml
   - include:
-      file: db/changelog/23072025_824_drop_column_verified_code.xml
+      file: db/changelog/20250723082500_drop_column_verified_code.yaml
   - include:
-      file: db/changelog/23072025_827_add_column_verified_code.xml
+      file: db/changelog/20250723082700_add_column_verified_code.yaml
   - include:
-      file: db/changelog/23072025_831_alter_column_verified_code.xml
+      file: db/changelog/20250723083300_alter_column_verified_code.yaml
   - include:
-      file: db/changelog/20260801_853_create_trusted_device.xml
+      file: db/changelog/20260108085300_create_trusted_device.yaml
   - include:
-      file: db/changelog/20260801_111_add_column_trusted_device.xml
+      file: db/changelog/20260108091100_add_column_trusted_device.yaml
   - include:
-      file: db/changelog/20260114_1253_create_table_token_family.xml
+      file: db/changelog/20260114125300_create_token_family.yaml
   - include:
-      file: db/changelog/20260113_1544_create_refresh_token.xml
+      file: db/changelog/20260114144400_create_refresh_token.yaml
   - include:
-      file: db/changelog/20260124_1322_add_column_refresh_token.xml
+      file: db/changelog/20260124132200_add_column_refresh_token.yaml
   - include:
-      file: db/changelog/20260128_20_19_create_bank_pather.xml
+      file: db/changelog/20260128201900_create_bank_parther.yaml
   - include:
-      file: db/changelog/20260128_2134_create_user_category_stat.xml
+      file: db/changelog/20260128213400_create_user_category_stat.yaml
   - include:
-      file: db/changelog/20260130_1748_create_quest.xml
+      file: db/changelog/20260130174800_create_quest.yaml
   - include:
-      file: db/changelog/20260130_1846_create_user_quest.xml
+      file: db/changelog/20260130184600_create_user_quest.yaml
   - include:
-      file: db/changelog/20260207_1447_add_column_quest.xml
+      file: db/changelog/20260207144700_add_column_quest.xml
   - include:
-      file: db/changelog/20260207_1448_add_column_user_quest.xml
+      file: db/changelog/20260207144800_add_column_user_quest.xml
   - include:
-      file: db/changelog/20260208_1651_create_bonus_account.yaml
+      file: db/changelog/20260208165100_create_bonus_account.yaml
   - include:
-      file: db/changelog/20260212_2325_add_column_refresh_token.xml
+      file: db/changelog/20260212232500_add_column_refresh_token.xml
   - include:
-      file: db/changelog/20260215_1919_alter_column_type_trusted_device.xml
+      file: db/changelog/20260215191999_alter_column_type_trusted_device.yaml
   - include:
-      file: db/changelog/20260220_1333_add_column_balance.xml
+      file: db/changelog/20260220133300_add_column_balance.yaml
   - include:
-      file: db/changelog/20260219_1503_batch_data.xml
+      file: db/changelog/20260219150300_seeding_exchange_rate.xml
   - include:
-      file: db/changelog/20260504_2241_update_column_in_exchange_rate.xml
+      file: db/changelog/20260219150310_seeding_bank_partner.xml
+  - include:
+      file: db/changelog/20260219150320_seeding_quest.xml
+  - include:
+      file: db/changelog/20260405224100_update_column_exchange_rate.yaml

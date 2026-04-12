@@ -1,0 +1,33 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260130184600_create_user_quest.yaml
+      author: amirgilmanov
+      changes:
+        - createTable:
+            tableName: user_quest
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: fk_user_quest_user
+                    referencedTableName: user_bank
+                    referencedColumnNames: id
+              - column:
+                  name: quest_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: fk_user_quest_quest
+                    referencedTableName: quest
+                    referencedColumnNames: id
+              - column:
+                  name: is_complete
+                  type: boolean
+                  defaultValueBoolean: false

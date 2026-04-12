@@ -1,0 +1,31 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20250712000000_create_verified_code.yaml
+      author: amirgilmanov
+      changes:
+        - createTable:
+            tableName: verified_code
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  autoIncrement: false
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: verified_code
+                  type: varchar(4)
+              - column:
+                  name: phone_number
+                  type: varchar(100)
+              - column:
+                  name: expires_at
+                  type: timestamp
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: fk_verified_code_user
+                    referencedTableName: user_bank
+                    referencedColumnNames: id

@@ -1,20 +1,29 @@
 package com.example.online_bank.service;
 
-import com.example.online_bank.domain.dto.RegistrationDto;
+import com.example.online_bank.domain.dto.RegistrationDtoRequest;
+import com.example.online_bank.domain.event.SendOtpEvent;
 import com.example.online_bank.exception.EntityAlreadyExistsException;
 import com.example.online_bank.mapper.UserMapper;
+import com.example.online_bank.repository.UserRepository;
+import com.example.online_bank.service.processor.RegistrationProcessor;
+import org.apache.commons.lang3.function.TriFunction;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ExtendWith(SpringExtension.class)
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 class RegistrationServiceTest {
+    @Mock
+    private UserRepository userRepository;
     @Mock
     private UserService userService;
     @Mock
@@ -25,54 +34,65 @@ class RegistrationServiceTest {
     private RoleService roleService;
     @Mock
     private VerifiedCodeService verifiedCodeService;
+    @Mock
+    private RegistrationProcessor registrationProcessor;
+    @Mock
+    private EventPublisherService eventPublisherService;
     @InjectMocks
     private RegistrationService registrationService;
 
     @Test
-    @Disabled
     void successSignUp() {
         //arrange Подготовка данных
-        RegistrationDto registrationDto = new RegistrationDto(
+        RegistrationDtoRequest request = new RegistrationDtoRequest(
                 "testName",
                 "testSurname",
                 "testPatronymic",
                 "89608052696",
                 "wass",
-                "myemail@.com"
+                "myemail@test.com"
         );
-        Assertions.assertDoesNotThrow(() -> registrationService.signUp(registrationDto));
+
+        SendOtpEvent mockEvent = new SendOtpEvent("myemail@test.com", "1234", "some text");
+
+        when(registrationProcessor.register(Mockito.eq(request), any(TriFunction.class)))
+                .thenReturn(mockEvent);
+        Assertions.assertDoesNotThrow(() -> registrationService.signUp(request));
+
+        verify(eventPublisherService).publishEvent(mockEvent);
     }
 
     @Test
-    @Disabled
     void failedSignUpByPhoneNumberAlreadyExists() {
         //arrange Подготовка данных
-        RegistrationDto registrationDto = new RegistrationDto(
+        RegistrationDtoRequest registrationDtoRequest = new RegistrationDtoRequest(
                 "testName",
                 "testSurname",
                 "testPatronymic",
                 "89608052696",
                 "wass",
-                "myemail@.com"
+                "myemail@test.com"
         );
-        Mockito.when(userService.existsByPhoneNumber("89608052696")).thenReturn(true);
-
-        Assertions.assertThrows(EntityAlreadyExistsException.class, () -> registrationService.signUp(registrationDto));
+        when(registrationProcessor.register(any(RegistrationDtoRequest.class), any(TriFunction.class)))
+                .thenThrow(EntityAlreadyExistsException.class);
+        assertThrows(EntityAlreadyExistsException.class, () -> registrationService.signUp(registrationDtoRequest));
+        verifyNoInteractions(eventPublisherService);
     }
 
     @Test
-    @Disabled
     void failedSignUpByEmailAlreadyExists() {
         //arrange Подготовка данных
-        RegistrationDto registrationDto = new RegistrationDto(
+        RegistrationDtoRequest request = new RegistrationDtoRequest(
                 "testName",
                 "testSurname",
                 "testPatronymic",
                 "89608052696",
                 "wass",
-                "myemail@.com"
+                "myemail@test.com"
         );
-        Mockito.when(userService.existsByEmail("myemail@.com")).thenReturn(true);
-        Assertions.assertThrows(EntityAlreadyExistsException.class, () -> registrationService.signUp(registrationDto));
+        when(registrationProcessor.register(any(RegistrationDtoRequest.class), any(TriFunction.class)))
+                .thenThrow(EntityAlreadyExistsException.class);
+        assertThrows(EntityAlreadyExistsException.class, () -> registrationService.signUp(request));
+        verifyNoInteractions(eventPublisherService);
     }
 }

@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20250723023600_add_column_verfied_code.yaml
+      author: admin
+      changes:
+        - addColumn:
+            tableName: verified_code
+            columns:
+              - column:
+                  name: verified_code_type
+                  type: varchar(10)

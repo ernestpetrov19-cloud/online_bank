@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20250704000800_rename_user_bank.yaml
+      author: amirgilmanov
+      changes:
+        - renameColumn:
+            tableName: user_bank
+            oldColumnName: block_expired_at
+            newColumnName: blocked_expired_at

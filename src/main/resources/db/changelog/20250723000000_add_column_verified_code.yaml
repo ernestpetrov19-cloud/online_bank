@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20250723000000_add_column_verified_code.yaml
+      author: amirgilmanov
+      changes:
+        - addColumn:
+            tableName: verified_code
+            columns:
+              - column:
+                  name: is_verified
+                  type: boolean

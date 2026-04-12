@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 202507220000_add_column_user.yaml
+      author: amirgilmanov
+      changes:
+        - addColumn:
+            tableName: user_bank
+            columns:
+              - column:
+                  name: is_verified
+                  type: boolean

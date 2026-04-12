@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260405224100_update_column_exchange_rate.yaml
+      author: admin
+      changes:
+        - modifyDataType:
+            tableName: exchange_rate
+            columnName: rate
+            newDataType: numeric (9,5)
+
+        - addDefaultValue:
+            tableName: exchange_rate
+            columnName: rate
+            defaultValue: '0'

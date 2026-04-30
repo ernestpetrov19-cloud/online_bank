@@ -2,13 +2,15 @@ package com.example.online_bank.service.processor;
 
 import com.example.online_bank.domain.dto.RegistrationDtoRequest;
 import com.example.online_bank.domain.entity.User;
-import com.example.online_bank.domain.entity.VerifiedCode;
-import com.example.online_bank.domain.event.SendOtpEvent;
+import com.example.online_bank.domain.entity.VerificationCode;
+import com.example.online_bank.domain.event.SendVerificationCodeEvent;
+import com.example.online_bank.enums.BodyMessage;
+import com.example.online_bank.enums.SubjectMessage;
 import com.example.online_bank.exception.EntityAlreadyExistsException;
 import com.example.online_bank.mapper.UserMapper;
 import com.example.online_bank.service.RoleService;
 import com.example.online_bank.service.UserService;
-import com.example.online_bank.service.VerifiedCodeService;
+import com.example.online_bank.service.domain.VerificationCodeService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -20,9 +22,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDateTime;
 
-import static com.example.online_bank.enums.VerifiedCodeType.EMAIL;
+import static com.example.online_bank.enums.CodeType.EMAIL_VERIFICATION;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,7 +38,7 @@ class RegistrationProcessorTest {
     @Mock
     private RoleService roleService;
     @Mock
-    private VerifiedCodeService verifiedCodeService;
+    private VerificationCodeService verificationCodeService;
     @Mock
     private UserService userService;
     @Mock
@@ -59,40 +62,32 @@ class RegistrationProcessorTest {
                 .email(request.email())
                 .build();
 
-        VerifiedCode verifiedCodeMock = VerifiedCode.builder()
-                .verifiedCode("1234")
+        VerificationCode verificationCodeMock = VerificationCode.builder()
+                .verificationCode("1234")
                 .user(userMock)
                 .createdAt(LocalDateTime.now())
-                .codeType(EMAIL)
+                .codeType(EMAIL_VERIFICATION)
                 .build();
 
-        SendOtpEvent expectedResult = new SendOtpEvent(request.email(), "1234", "some text");
+        SendVerificationCodeEvent expectedResult = new SendVerificationCodeEvent(request.email(), "1234", SubjectMessage.VERIFICATION, BodyMessage.VERIFICATION_BODY);
 
         //обучение моков
         when(userService.existsByPhoneNumber(request.phone())).thenReturn(false);
         when(userService.existsByEmail(request.email())).thenReturn(false);
         when(userMapper.toUser(eq(request), any(), any())).thenReturn(userMock);
-        when(verifiedCodeService.createVerifiedCode(anyString(), eq(userMock), any(), eq(EMAIL)))
-                .thenReturn(verifiedCodeMock);
-        when(userMapper.toSendOtpEvent(eq(request), anyString())).thenReturn(expectedResult);
+        when(verificationCodeService.create(eq(userMock), eq(EMAIL_VERIFICATION)))
+                .thenReturn(verificationCodeMock);
 
         //act действие
-        SendOtpEvent actualResult = registrationProcessor.register(request, userMapper::toUser);
-        log.info("result {}", actualResult);
+        SendVerificationCodeEvent actualResult = registrationProcessor.register(request, userMapper::toUser);
 
         //assert проверка
         Assertions.assertNotNull(actualResult);
-        Assertions.assertEquals(expectedResult.email(), actualResult.email());
+        Assertions.assertEquals(expectedResult.userEmail(), actualResult.userEmail());
 
         verify(userMapper).toUser(eq(request), any(RoleService.class), any(BCryptPasswordEncoder.class));
         verify(userService).save(eq(userMock));
-        verify(verifiedCodeService).createExpirationDate(200);
-        verify(verifiedCodeService).createVerifiedCode(anyString(), eq(userMock), any(), eq(EMAIL));
-        verify(verifiedCodeService).save(argThat(code ->
-                code.getUser().equals(userMock)
-                        && code.getCodeType().equals(EMAIL)
-        ));
-        verify(userMapper).toSendOtpEvent(eq(request), anyString());
+        verify(verificationCodeService).create(eq(userMock), any());
     }
 
     @Test
@@ -105,40 +100,33 @@ class RegistrationProcessorTest {
                 .email(request.email())
                 .build();
 
-        VerifiedCode verifiedCodeMock = VerifiedCode.builder()
-                .verifiedCode("1234")
+        VerificationCode verificationCodeMock = VerificationCode.builder()
+                .verificationCode("1234")
                 .user(adminMock)
                 .createdAt(LocalDateTime.now())
-                .codeType(EMAIL)
+                .codeType(EMAIL_VERIFICATION)
                 .build();
 
-        SendOtpEvent expectedResult = new SendOtpEvent(request.email(), "1234", "some text");
+        SendVerificationCodeEvent expectedResult = new SendVerificationCodeEvent(request.email(), "1234", SubjectMessage.VERIFICATION, BodyMessage.VERIFICATION_BODY);
 
         //обучение моков
         when(userService.existsByPhoneNumber(request.phone())).thenReturn(false);
         when(userService.existsByEmail(request.email())).thenReturn(false);
         when(userMapper.toAdmin(eq(request), any(), any())).thenReturn(adminMock);
-        when(verifiedCodeService.createVerifiedCode(anyString(), eq(adminMock), any(), eq(EMAIL)))
-                .thenReturn(verifiedCodeMock);
-        when(userMapper.toSendOtpEvent(eq(request), anyString())).thenReturn(expectedResult);
+        when(verificationCodeService.create(eq(adminMock), eq(EMAIL_VERIFICATION)))
+                .thenReturn(verificationCodeMock);
 
         //act действие
-        SendOtpEvent actualResult = registrationProcessor.register(request, userMapper::toAdmin);
+        SendVerificationCodeEvent actualResult = registrationProcessor.register(request, userMapper::toAdmin);
         log.info("result {}", actualResult);
 
         //assert проверка
         Assertions.assertNotNull(actualResult);
-        Assertions.assertEquals(expectedResult.email(), actualResult.email());
+        Assertions.assertEquals(expectedResult.userEmail(), actualResult.userEmail());
 
         verify(userMapper).toAdmin(eq(request), any(RoleService.class), any(BCryptPasswordEncoder.class));
         verify(userService).save(eq(adminMock));
-        verify(verifiedCodeService).createExpirationDate(200);
-        verify(verifiedCodeService).createVerifiedCode(anyString(), eq(adminMock), any(), eq(EMAIL));
-        verify(verifiedCodeService).save(argThat(code ->
-                code.getUser().equals(adminMock)
-                        && code.getCodeType().equals(EMAIL)
-        ));
-        verify(userMapper).toSendOtpEvent(eq(request), anyString());
+        verify(verificationCodeService).create(eq(adminMock), eq(EMAIL_VERIFICATION));
     }
 
     @Test
@@ -154,7 +142,7 @@ class RegistrationProcessorTest {
 
         // 3. Assert (проверка)
         verify(userService, never()).save(any());
-        verifyNoInteractions(userMapper, verifiedCodeService);
+        verifyNoInteractions(userMapper, verificationCodeService);
     }
 
     @Test
@@ -164,14 +152,14 @@ class RegistrationProcessorTest {
         //2. Act & assert (действие и проверка)
         Assertions.assertThrows(EntityAlreadyExistsException.class,
                 () -> registrationProcessor.register(request, userMapper::toUser)
-                );
+        );
         //3. Assert (проверка)
         verify(userService, never()).save(any());
-        verifyNoInteractions(userMapper, verifiedCodeService);
+        verifyNoInteractions(userMapper, verificationCodeService);
     }
 
     @Test
-    void failureRegister_UserExistWithProvidedEmailButNotWithPhone(){
+    void failureRegister_UserExistWithProvidedEmailButNotWithPhone() {
         //1. Arrange (подготовка)
         when(userService.existsByPhoneNumber(request.phone())).thenReturn(false);
         when(userService.existsByEmail(request.email())).thenReturn(true);
@@ -182,6 +170,6 @@ class RegistrationProcessorTest {
         //3. Assert (проверка)
         verify(userService).existsByEmail(eq(request.email()));
         verify(userService, never()).save(any());
-        verifyNoInteractions(userMapper, verifiedCodeService);
+        verifyNoInteractions(userMapper, verificationCodeService);
     }
 }

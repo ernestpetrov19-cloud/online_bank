@@ -2,8 +2,8 @@ package com.example.online_bank.controller;
 
 import com.example.online_bank.domain.dto.AccountDtoResponse;
 import com.example.online_bank.domain.entity.Account;
-import com.example.online_bank.domain.model.JwtUserDetails;
 import com.example.online_bank.enums.CurrencyCode;
+import com.example.online_bank.security.userdetails.JwtUserDetails;
 import com.example.online_bank.service.AccountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

@@ -33,7 +33,7 @@ public class CodeGeneratorUtil {
     /**
      * Генерация otp кода из 4 цифр
      */
-    public static String generateOtp() {
+    public static String generateVerificationCode() {
         return String.format("%04d", random.nextInt(OTP_FORMAT));
     }
 }

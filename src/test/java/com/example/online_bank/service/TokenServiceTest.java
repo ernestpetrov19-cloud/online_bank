@@ -1,7 +1,7 @@
 package com.example.online_bank.service;
 
 import com.example.online_bank.domain.dto.UserContainer;
-import com.example.online_bank.security.jwt.factory.impl.JwtFactoryOrchestrator;
+import com.example.online_bank.security.jwt.factory.impl.TokenResolverOrchestrator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +17,7 @@ class TokenServiceTest {
     @InjectMocks
     private TokenService tokenService;
     @Mock
-    private JwtFactoryOrchestrator jwtFactoryOrchestrator;
+    private TokenResolverOrchestrator jwtFactoryOrchestrator;
 
     @Test
     void successGetAccessToken() {

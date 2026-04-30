@@ -1,8 +1,8 @@
 package com.example.online_bank.controller;
 
 import com.example.online_bank.domain.dto.*;
-import com.example.online_bank.service.crud.CrudCurrencyService;
 import com.example.online_bank.service.CurrencyConversionService;
+import com.example.online_bank.service.domain.CurrencyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,7 +11,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import static org.springframework.http.HttpStatus.CREATED;
 
@@ -20,7 +23,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RequestMapping("/api/currency")
 @RequiredArgsConstructor
 public class CurrencyController {
-    private final CrudCurrencyService crudCurrencyService;
+    private final CurrencyService currencyService;
     private final CurrencyConversionService currencyConversionService;
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -28,7 +31,7 @@ public class CurrencyController {
     @Operation(summary = "Создать обменный курс")
     @ApiResponse(responseCode = "201", content = @Content(mediaType = "text/plain"))
     public ResponseEntity<RateResponseDto> createExchangeRate(@RequestBody @Valid CreateExchangeRateDto dtoRequest) {
-        return ResponseEntity.status(CREATED).body(crudCurrencyService.create(
+        return ResponseEntity.status(CREATED).body(currencyService.create(
                 dtoRequest.baseCurrency(),
                 dtoRequest.targetCurrency(),
                 dtoRequest.rate()
@@ -48,6 +51,6 @@ public class CurrencyController {
     @PostMapping("/find-rate")
     @Operation(summary = "Найти курс")
     public RateResponseDto findRate(@RequestBody RateRequestDto dto) {
-        return crudCurrencyService.findRate(dto);
+        return currencyService.findRate(dto);
     }
 }

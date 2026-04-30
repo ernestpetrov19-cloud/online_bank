@@ -7,9 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface TrustedDeviceRepository extends JpaRepository<TrustedDevice, Long> {
-    Optional<TrustedDevice> findByDeviceIdAndUser_email(String email, String deviceId);
-
-    boolean existsByDeviceIdAndUser_Email(String deviceId, String userEmail);
+    Optional<TrustedDevice> findByDeviceNameAndDeviceIdAndUser(String deviceName, String deviceId, User user);
 
     void deleteByDeviceIdAndUser(String deviceId, User user);
 }

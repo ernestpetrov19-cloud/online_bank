@@ -22,7 +22,6 @@ public class UpdateUserStatEventListener {
     @EventListener
     public void updateUserStat(UpdateUserStatEvent event) {
         UserCategoryStats userCategoryStats = userCategoryStatsService.updateUserStat(event);
-        //TODO отправлять нормально статистику для изменения статистики у квеста
         UpdateUserQuestEvent updateUserQuestEvent = new UpdateUserQuestEvent(
                 userCategoryStats.getCountSpendInMonth(),
                 userCategoryStats.getCategory(),

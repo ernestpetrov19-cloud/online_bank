@@ -1,11 +1,9 @@
 package com.example.online_bank.service;
 
-import com.example.online_bank.exception.SendEmailException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -21,25 +19,16 @@ public class MailService {
 
     /**
      * @param to      Адрес получателя (example@gmail.com)
-     * @param subject Тема письма (Ваш код подтверждения)
-     * @param text    Содержимое письма (Здравствуйте, ваш код подтверждения)
+     * @param subject Тема письма (Подтверждение входа/регистрации)
+     * @param body    Содержимое письма (Здравствуйте, ваш код подтверждения)
      */
-    public void sendMail(String to, String subject, String text) {
+    public void send(String to, String subject, String body) {
+        SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+        simpleMailMessage.setTo(to);
+        simpleMailMessage.setSubject(subject);
+        simpleMailMessage.setText(body);
+        simpleMailMessage.setFrom(fromTo);
 
-        if (fromTo == null) {
-            throw new NullPointerException("fromTo is null");
-        }
-
-        try {
-            SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-            simpleMailMessage.setTo(to);
-            simpleMailMessage.setSubject(subject);
-            simpleMailMessage.setText(text);
-            simpleMailMessage.setFrom(fromTo);
-
-            javaMailSender.send(simpleMailMessage);
-        } catch (MailException e) {
-            throw new SendEmailException("Ошибка при отправке почты " + e);
-        }
+        javaMailSender.send(simpleMailMessage);
     }
 }

@@ -2,6 +2,7 @@ package com.example.online_bank.service;
 
 import com.example.online_bank.domain.dto.ConvertCurrencyResponseDto;
 import com.example.online_bank.exception.InvertedRateNotFoundException;
+import com.example.online_bank.service.impl.LocalDataBaseCurrencyRateProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,7 +44,7 @@ class CurrencyConversionServiceTest {
     @Test
     void successConvert_ByInvertedRate() {
         //хотим 15$ перевести в рубли
-        //курс доллар рубль 90 не найден
+        //курс доллар рубль 90 не найден,
         // чтобы найти мы 15 * 90 = 1350
         // есть курс RUB USD 0.01111
         // 1 / 0.01111 = 90.09

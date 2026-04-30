@@ -7,6 +7,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 import static jakarta.persistence.EnumType.STRING;
+import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Table
@@ -17,7 +18,7 @@ import static jakarta.persistence.EnumType.STRING;
 @Setter
 public class RefreshToken {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
     @Column
@@ -37,7 +38,7 @@ public class RefreshToken {
     private TokenStatus status;
 
     @Column
-    private String uuidHash;
+    private String uuid;
 
     @ManyToOne()
     @JoinColumn(name = "family_id")

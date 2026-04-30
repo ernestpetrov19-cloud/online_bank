@@ -185,7 +185,7 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <!--        user agent parser-->
+        <!--        verifiedUser agent parser-->
         <dependency>
             <groupId>is.tagomor.woothee</groupId>
             <artifactId>woothee-java</artifactId>
@@ -193,7 +193,7 @@
             <scope>compile</scope>
         </dependency>
 
-        <!--        resend email-->
+        <!--        resend userEmail-->
         <dependency>
             <groupId>com.resend</groupId>
             <artifactId>resend-java</artifactId>

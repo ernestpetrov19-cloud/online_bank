@@ -38,9 +38,9 @@ class CodeGeneratorUtilTest {
 
     @Test
     @DisplayName("Генерация otp кода")
-    void generateOtp() {
+    void generateVerificationCode() {
         //arrange подготовка данных
-        String otp = CodeGeneratorUtil.generateOtp();
+        String otp = CodeGeneratorUtil.generateVerificationCode();
         //act проверка результата
         assertNotNull(otp);
         assertEquals(4, otp.length());

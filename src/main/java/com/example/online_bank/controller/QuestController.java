@@ -1,8 +1,8 @@
 package com.example.online_bank.controller;
 
 import com.example.online_bank.domain.dto.QuestResponseDto;
-import com.example.online_bank.domain.dto.UserQuestWithProgress;
-import com.example.online_bank.domain.model.JwtUserDetails;
+import com.example.online_bank.domain.dto.UserQuestResponseDto;
+import com.example.online_bank.security.userdetails.JwtUserDetails;
 import com.example.online_bank.service.QuestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,8 +28,8 @@ public class QuestController {
         return ResponseEntity.ok(questService.createRandomQuest());
     }
 
-    @GetMapping("/get-user")
-    public ResponseEntity<List<UserQuestWithProgress>> findAllUserQuest(@AuthenticationPrincipal JwtUserDetails userDetails) {
+    @GetMapping("/get-verifiedUser")
+    public ResponseEntity<List<UserQuestResponseDto>> findAllUserQuest(@AuthenticationPrincipal JwtUserDetails userDetails) {
         return ResponseEntity.ok(questService.findAllByUserQuest(UUID.fromString(userDetails.getUuid())));
     }
 }

@@ -1,12 +1,13 @@
 package com.example.online_bank.security.filter;
 
-import com.example.online_bank.security.token.JwtRequestToken;
+import com.example.online_bank.security.token.JwtAuthenticationToken;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -34,7 +35,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
      * будет перекладывать данные из токена в Security контекст
      */
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain filterChain)
             throws ServletException, IOException {
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             filterChain.doFilter(request, response);
@@ -47,7 +48,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                 jwtToken = authorizationHeader.substring(7);
-                Authentication authResult = this.authenticationManager.authenticate(new JwtRequestToken(jwtToken));
+                Authentication authResult = this.authenticationManager.authenticate(new JwtAuthenticationToken(jwtToken));
 
                 // Проверка на то, что контекст не занят кем-то другим
                 if (SecurityContextHolder.getContext().getAuthentication() == null) {

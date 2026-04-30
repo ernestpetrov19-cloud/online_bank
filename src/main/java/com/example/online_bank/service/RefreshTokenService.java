@@ -4,11 +4,9 @@ import com.example.online_bank.domain.entity.RefreshToken;
 import com.example.online_bank.domain.entity.TokenFamily;
 import com.example.online_bank.enums.TokenStatus;
 import com.example.online_bank.repository.RefreshTokenRepository;
-import io.jsonwebtoken.JwtException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,47 +20,35 @@ import static com.example.online_bank.enums.TokenStatus.CREATED;
 @Slf4j
 public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
-    private final JwtService jwtService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public void createRefreshTokenEntity(
+    public void create(
+            String tokenUuid,
             String token,
             TokenFamily tokenFamily,
             LocalDateTime expiredAt,
             LocalDateTime createdAt
     ) {
-        try {
-            String tokenUuid = jwtService.getJwtTokenUuid(token);
-
-            RefreshToken refreshToken = RefreshToken.builder()
-                    //fixme пока не хэшируется
-                    .tokenHash(bCryptPasswordEncoder.encode(token))
-                    .expiresAt(expiredAt)
-                    .revokedAt(null)
-                    .createdAt(createdAt)
-                    .status(CREATED)
-                    .uuidHash(tokenUuid)
-                    .family(tokenFamily)
-                    .build();
-            save(refreshToken);
-        } catch (JwtException e) {
-            log.error(e.getMessage());
-            throw new BadCredentialsException(e.getMessage());
-        }
+        RefreshToken refreshToken = RefreshToken.builder()
+                .tokenHash(encodeToken(token))
+                .expiresAt(expiredAt)
+                .revokedAt(null)
+                .createdAt(createdAt)
+                .status(CREATED)
+                .uuid(tokenUuid)
+                .family(tokenFamily)
+                .build();
+        refreshTokenRepository.save(refreshToken);
     }
 
-    public void save(RefreshToken refreshToken) {
-        refreshTokenRepository.save(refreshToken);
+    private String encodeToken(String token) {
+        return bCryptPasswordEncoder.encode(token);
     }
 
     public void revoke(RefreshToken refreshToken) {
         refreshToken.setStatus(TokenStatus.REVOKED);
         refreshToken.setRevokedAt(LocalDateTime.now());
         refreshTokenRepository.save(refreshToken);
-    }
-
-    public RefreshToken findByUUidHash(String hashUuid) {
-        return refreshTokenRepository.findByUuidHash(hashUuid).orElseThrow(EntityNotFoundException::new);
     }
 
     public void revokeAllByFamily(TokenFamily family) {
@@ -74,8 +60,10 @@ public class RefreshTokenService {
         });
     }
 
-    public RefreshToken parseToken(String token) {
-        String uuid = jwtService.getJwtTokenUuid(token);
-        return findByUUidHash(uuid);
+    public RefreshToken findByUuid(String uuid) {
+        return refreshTokenRepository.findByUuid(uuid).orElseThrow(() -> {
+            log.error("Token with provided not found");
+            return new EntityNotFoundException();
+        });
     }
 }

@@ -21,7 +21,7 @@ public class TokenFamily {
     private Boolean isBlocked;
 
     @ManyToOne
-    @JoinColumn(name = "trusted_device_id")
+    @JoinColumn(name = "trusted_device_id", referencedColumnName = "id")
     private TrustedDevice trustedDevice;
 
     @OneToMany(mappedBy = "family")
@@ -29,6 +29,6 @@ public class TokenFamily {
     private List<RefreshToken> refreshTokens;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 }

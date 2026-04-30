@@ -35,6 +35,6 @@ public class TestController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/send-email")
     public void sendEmail(@RequestParam String email) {
-        notificationService.sendOtpCode(email, "HELLO WORLD", "");
+        notificationService.sendVerificationCode(email, "HELLO WORLD", "");
     }
 }

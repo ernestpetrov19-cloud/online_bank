@@ -1,110 +1,420 @@
 package com.example.online_bank.service;
 
-import com.example.online_bank.domain.dto.VerificationRequest;
-import com.example.online_bank.domain.dto.UserContainer;
-import com.example.online_bank.domain.entity.User;
-import com.example.online_bank.exception.EntityAlreadyVerifiedException;
-import com.example.online_bank.exception.VerificationOtpException;
+import com.example.online_bank.domain.dto.*;
+import com.example.online_bank.domain.entity.*;
+import com.example.online_bank.domain.event.RelatableUserToQuestEvent;
+import com.example.online_bank.domain.event.SendVerificationCodeEvent;
+import com.example.online_bank.enums.CodeType;
+import com.example.online_bank.enums.Roles;
+import com.example.online_bank.enums.TokenStatus;
+import com.example.online_bank.exception.DeviceNotFoundException;
+import com.example.online_bank.exception.ReuseDetectionException;
 import com.example.online_bank.mapper.UserMapper;
-import com.example.online_bank.repository.UserRepository;
-import com.example.online_bank.repository.VerifiedCodeRepository;
-import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.DisplayName;
+import com.example.online_bank.security.userdetails.CustomUserDetails;
+import com.example.online_bank.service.domain.VerificationCodeService;
+import io.jsonwebtoken.Claims;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-import static com.example.online_bank.enums.VerifiedCodeType.EMAIL;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
+import static com.example.online_bank.enums.AuthenticationResponseKey.*;
+import static com.example.online_bank.enums.BodyMessage.CONFIRM_LOGIN;
+import static com.example.online_bank.enums.CodeType.EMAIL_VERIFICATION;
+import static com.example.online_bank.enums.SecurityMessage.HACKING_ATTEMPT_DETECTED;
+import static com.example.online_bank.enums.SubjectMessage.AUTHENTICATION;
+import static com.example.online_bank.enums.TestUserData.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
+@Slf4j
 @ExtendWith(SpringExtension.class)
 class AuthenticationServiceTest {
-    @Mock
-    UserService userService;
     @InjectMocks
-    AuthenticationService authenticationService;
+    private AuthenticationService authenticationService;
     @Mock
-    VerifiedCodeService verifiedCodeService;
+    TokenFamilyService tokenFamilyService;
     @Mock
-    UserMapper userMapper;
+    private VerificationCodeService verificationCodeService;
     @Mock
-    TokenService tokenService;
+    private TokenService tokenService;
     @Mock
-    UserRepository userRepository;
+    private TrustedDeviceService trustedDeviceService;
     @Mock
-    VerifiedCodeRepository verifiedCodeRepository;
-    private VerificationRequest authRq;
+    private RefreshTokenService refreshTokenService;
+    @Mock
+    private JwtService jwtService;
+    @Mock
+    private UserAgentService userAgentService;
+    @Mock
+    private VerificationManager verificationManager;
+    @Mock
+    private UserMapper userMapper;
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
+    @Mock
+    private DeviceChallengeService deviceChallengeService;
+    @Mock
+    private AuthenticationManager authenticationManager;
 
-    @BeforeEach
-    void setUp() {
-        authRq = new VerificationRequest(
-                "testEmail@.com", "1234", "iphone 15", "chrome", "qq"
+    private static VerificationRequestDto verificationRequestDto;
+
+    private static VerificationResponseDto verificationResponseDtoMock;
+    private static TrustedDevice trustedDeviceMock;
+    private final TokenFamily tokenFamilyMock = new TokenFamily();
+    private static Authentication authenticationMock;
+
+    private static LoginRequestDto loginRequestDto;
+    private static LoginRequestDto loginRequestDtoWithAnotherBrowserVersion;
+
+
+    private static final User userMock = User.builder()
+            .id(1L)
+            .roles(List.of(
+                    Role.builder()
+                            .name(Roles.ROLE_USER.getValue())
+                            .build())
+            )
+            .name(NAME.getValue())
+            .email(EMAIL.getValue())
+            .build();
+
+    @BeforeAll()
+    static void init() {
+        String uuid = UUID.randomUUID().toString();
+
+        verificationRequestDto = new VerificationRequestDto(
+                EMAIL.getValue(),
+                VERIFICATION_CODE.getValue(),
+                DEVICE_NAME.getValue(),
+                CHROME_USER_AGENT.getValue(),
+                uuid
         );
-    }
 
-    @Test
-    void failAuthenticationBy_EmailNotFound() {
-        when(userRepository.findByEmail(Mockito.anyString())).thenReturn(Optional.empty());
+        loginRequestDto = new LoginRequestDto(
+                EMAIL.getValue(),
+                PASSWORD.getValue(),
+                uuid,
+                DEVICE_NAME.getValue(),
+                CHROME_USER_AGENT.getValue()
+        );
 
-        assertThrows(EntityNotFoundException.class, () -> authenticationService.firstVerification(authRq));
-    }
-
-    @Test
-    @Disabled
-    void failAuthenticationBy_NotVerifiedCode() throws VerificationOtpException {
-
-        User userMock = User.builder()
-                .isVerified(false)
-                .id(1L)
-                .email("testEmail@.com")
+        verificationResponseDtoMock = new VerificationResponseDto(
+                User.builder()
+                        .isVerified(true)
+                        .build()
+        );
+        authenticationMock = new UsernamePasswordAuthenticationToken(new CustomUserDetails(userMock), null);
+        trustedDeviceMock = TrustedDevice.builder()
+                .user(userMock)
+                .deviceId(loginRequestDto.deviceId())
+                .deviceName(loginRequestDto.deviceName())
+                .userAgent(CHROME_USER_AGENT.getValue())
                 .build();
 
-        when(userService.findByEmail(authRq.email())).thenReturn(Optional.of(userMock));
-
-        doThrow(VerificationOtpException.class)
-                .when(verifiedCodeService)
-                .validateCode(userMock, authRq.code(), EMAIL, false);
-
-        doThrow(VerificationOtpException.class)
-                .when(userService)
-                .verifyEmailCode(userMock, authRq.code(), false);
-
-        UserContainer userContainer = new UserContainer("random", "test", List.of("ROLE_USER"));
-
-        when(tokenService.getAccessToken(userContainer)).thenReturn("accessToken");
-        when(tokenService.getRefreshToken(userContainer)).thenReturn("refreshToken");
-        when(tokenService.getIdToken(userContainer)).thenReturn("idToken");
-
-        assertThrows(
-                BadCredentialsException.class,
-                () -> authenticationService.firstVerification(authRq)
+        loginRequestDtoWithAnotherBrowserVersion = new LoginRequestDto(
+                EMAIL.getValue(),
+                PASSWORD.getValue(),
+                uuid,
+                DEVICE_NAME.getValue(),
+                UPDATED_CHROME_USER_AGENT.getValue()
         );
-        assertFalse(userMock.getIsVerified());
     }
 
     @Test
-    @DisplayName("Ошибка верификации по почте: почта уже подтверждена")
-    @Disabled
-    void failVerifyEmailCode_EmailAlreadyVerified() {
+    void successFirstVerification() {
+        when(verificationManager.verifyUserByEmail(
+                verificationRequestDto.verificationCode(),
+                verificationRequestDto.email(),
+                EMAIL_VERIFICATION))
+                .thenReturn(verificationResponseDtoMock);
 
-        Long userId = 1L;
-        User userMock = User.builder().id(userId).isVerified(true).build();
-        when(userService.findByEmail(authRq.email())).thenReturn(Optional.of(userMock));
+        when(trustedDeviceService.create(anyString(), anyString(), any(User.class), anyString()))
+                .thenReturn(trustedDeviceMock);
 
-        assertThrows(
-                EntityAlreadyVerifiedException.class,
-                () -> authenticationService.firstVerification(authRq));
+        AuthenticationResponseDto result = authenticationService
+                .firstVerification(verificationRequestDto);
+
+        assertNotNull(result);
+        assertTrue(result.tokens().containsKey(ACCESS_TOKEN.getValue()));
+        assertTrue(result.tokens().containsKey(ID_TOKEN.getValue()));
+        assertTrue(result.tokens().containsKey(REFRESH_TOKEN.getValue()));
+
+        verify(trustedDeviceService).create(eq(verificationRequestDto.deviceName()),
+                eq(verificationRequestDto.deviceId()),
+                eq(verificationResponseDtoMock.verifiedUser()),
+                eq(verificationRequestDto.userAgent())
+        );
+        verify(tokenFamilyService).create(
+                any(TrustedDevice.class),
+                eq(verificationResponseDtoMock.verifiedUser())
+        );
+        verify(applicationEventPublisher).publishEvent(any(RelatableUserToQuestEvent.class));
     }
+
+    @Test
+    void successDefaultVerification() {
+        when(verificationManager.verifyUserByEmail(
+                verificationRequestDto.verificationCode(),
+                verificationRequestDto.email(),
+                EMAIL_VERIFICATION
+        )).thenReturn(verificationResponseDtoMock);
+
+        doNothing().when(deviceChallengeService).existsByParameters(
+                verificationRequestDto.deviceName(),
+                verificationRequestDto.deviceId(),
+                verificationRequestDto.userAgent(),
+                verificationResponseDtoMock.verifiedUser());
+
+        when(trustedDeviceService.create(
+                eq(verificationRequestDto.deviceName()),
+                eq(verificationRequestDto.deviceId()),
+                eq(verificationResponseDtoMock.verifiedUser()),
+                eq(verificationRequestDto.userAgent())
+        )).thenReturn(trustedDeviceMock);
+
+        when(tokenFamilyService.create(any(TrustedDevice.class), any(User.class))).thenReturn(tokenFamilyMock);
+
+        AuthenticationResponseDto result = authenticationService.defaultVerification(verificationRequestDto);
+
+        assertNotNull(result);
+        assertTrue(result.tokens().containsKey(ACCESS_TOKEN.getValue()));
+        assertTrue(result.tokens().containsKey(ID_TOKEN.getValue()));
+        assertTrue(result.tokens().containsKey(REFRESH_TOKEN.getValue()));
+
+        verify(deviceChallengeService, atLeastOnce()).existsByParameters(verificationRequestDto.deviceName(),
+                verificationRequestDto.deviceId(),
+                verificationRequestDto.userAgent(),
+                verificationResponseDtoMock.verifiedUser());
+
+        verify(trustedDeviceService, atLeastOnce()).create(
+                eq(verificationRequestDto.deviceName()),
+                eq(verificationRequestDto.deviceId()),
+                eq(verificationResponseDtoMock.verifiedUser()),
+                eq(verificationRequestDto.userAgent()));
+        verify(tokenFamilyService, atLeastOnce()).create(
+                any(TrustedDevice.class), eq(verificationResponseDtoMock.verifiedUser()));
+    }
+
+    @Test
+    void successLogin() {
+        when(authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                loginRequestDto.email(),
+                loginRequestDto.password()))
+        ).thenReturn(authenticationMock);
+
+        when(trustedDeviceService.findByParam(
+                eq(loginRequestDto.deviceName()),
+                eq(loginRequestDto.deviceId()),
+                eq(userMock)
+        )).thenReturn(Optional.of(trustedDeviceMock));
+
+        doNothing().when(userAgentService)
+                .checkUserAgent(loginRequestDto.userAgent(), trustedDeviceMock.getUserAgent());
+
+        when(userAgentService.checkBrowserVersion(
+                eq(loginRequestDto.userAgent()),
+                eq(trustedDeviceMock.getUserAgent()
+                ))).thenReturn(true);
+
+        when(tokenFamilyService.create(eq(trustedDeviceMock), eq(userMock))).thenReturn(tokenFamilyMock);
+
+        AuthenticationResponseDto result = authenticationService.login(loginRequestDto);
+        assertNotNull(result);
+        assertTrue(result.tokens().containsKey(ACCESS_TOKEN.getValue()));
+
+        assertTrue(result.tokens().containsKey(ID_TOKEN.getValue()));
+        assertTrue(result.tokens().containsKey(REFRESH_TOKEN.getValue()));
+
+        verify(trustedDeviceService, never()).updateUserAgent(anyString(), any(TrustedDevice.class));
+        verify(tokenFamilyService, atLeastOnce()).create(any(), any());
+    }
+
+    @Test
+    void successLoginWithAnotherBrowserVersion() {
+        when(authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                loginRequestDtoWithAnotherBrowserVersion.email(),
+                loginRequestDtoWithAnotherBrowserVersion.password()))
+        ).thenReturn(authenticationMock);
+
+        when(trustedDeviceService.findByParam(
+                eq(loginRequestDtoWithAnotherBrowserVersion.deviceName()),
+                eq(loginRequestDtoWithAnotherBrowserVersion.deviceId()),
+                eq(userMock)
+        )).thenReturn(Optional.of(trustedDeviceMock));
+
+        doNothing().when(userAgentService)
+                .checkUserAgent(loginRequestDtoWithAnotherBrowserVersion.userAgent(), trustedDeviceMock.getUserAgent());
+
+        when(userAgentService.checkBrowserVersion(
+                eq(loginRequestDtoWithAnotherBrowserVersion.userAgent()),
+                eq(trustedDeviceMock.getUserAgent()
+                ))).thenReturn(false);
+
+        AuthenticationResponseDto result = authenticationService.login(loginRequestDtoWithAnotherBrowserVersion);
+        assertNotNull(result);
+        assertTrue(result.tokens().containsKey(ACCESS_TOKEN.getValue()));
+        assertTrue(result.tokens().containsKey(ID_TOKEN.getValue()));
+        assertTrue(result.tokens().containsKey(REFRESH_TOKEN.getValue()));
+
+        log.info("request user agent - {}", loginRequestDtoWithAnotherBrowserVersion.userAgent());
+        log.info("device user agent - {}", trustedDeviceMock.getUserAgent());
+        verify(trustedDeviceService, atLeastOnce()).updateUserAgent(
+                eq(loginRequestDtoWithAnotherBrowserVersion.userAgent()),
+                eq(trustedDeviceMock));
+        verify(tokenFamilyService, atLeastOnce()).create(any(), any());
+    }
+
+    @Test
+    void successLogin_VerificationRequired() {
+        VerificationCode verificationCodeMock = VerificationCode.builder()
+                .user(userMock)
+                .verificationCode(VERIFICATION_CODE.getValue())
+                .codeType(CodeType.EMAIL_AUTHENTICATION)
+                .build();
+        log.info("verificationCodeMock - {}", verificationCodeMock);
+        var sendVerificationCodeEventMock = new SendVerificationCodeEvent(EMAIL.getValue(), VERIFICATION_CODE.getValue(), AUTHENTICATION, CONFIRM_LOGIN);
+
+        when(authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                loginRequestDto.email(),
+                loginRequestDto.password()))
+        ).thenReturn(authenticationMock);
+
+        when(trustedDeviceService.findByParam(
+                eq(loginRequestDto.deviceName()),
+                eq(loginRequestDto.deviceId()),
+                eq(userMock)
+        )).thenReturn(Optional.empty());
+
+        when(verificationCodeService.create(any(), any())).thenReturn(verificationCodeMock);
+        doNothing().when(applicationEventPublisher).publishEvent(sendVerificationCodeEventMock);
+
+        assertThrows(DeviceNotFoundException.class, () -> authenticationService.login(loginRequestDto));
+        verify(deviceChallengeService).create(any(), anyString(), anyString(), anyString());
+        verify(applicationEventPublisher).publishEvent(any(SendVerificationCodeEvent.class));
+        verify(userAgentService, never()).checkUserAgent(anyString(), anyString());
+        verify(userAgentService, never()).checkBrowserVersion(anyString(), anyString());
+        verify(trustedDeviceService, never()).updateUserAgent(any(), any());
+        verify(tokenFamilyService, never()).create(any(), any());
+    }
+
+    @Test
+    void successSilentLogin() {
+        String oldTokenUuid = "oldTokenUuid";
+        Claims claimsMock = mock(Claims.class);
+        RefreshToken refreshTokenMock = RefreshToken.builder()
+                .uuid(oldTokenUuid)
+                .status(TokenStatus.CREATED)
+                .build();
+        TokenFamily tokenFamilyMock = TokenFamily.builder()
+                .refreshTokens(List.of(refreshTokenMock))
+                .build();
+        refreshTokenMock.setFamily(tokenFamilyMock);
+
+        User userMock = User.builder()
+                .tokenFamilies(List.of(tokenFamilyMock))
+                .build();
+        var silentLoginRequestDto = new SilentLoginRequestDto("token", UUID.randomUUID().toString());
+        when(jwtService.getPayload(anyString())).thenReturn(claimsMock);
+        when(jwtService.getUuid(eq(claimsMock))).thenReturn(oldTokenUuid);
+        when(refreshTokenService.findByUuid(eq(oldTokenUuid))).thenReturn(refreshTokenMock);
+        AuthenticationResponseDto result = authenticationService.silentLogin(silentLoginRequestDto);
+        assertNotNull(result);
+        assertTrue(result.tokens().containsKey(ACCESS_TOKEN.getValue()));
+        assertTrue(result.tokens().containsKey(ID_TOKEN.getValue()));
+        assertTrue(result.tokens().containsKey(REFRESH_TOKEN.getValue()));
+    }
+
+    @Test
+    void failureSilentLogin() {
+        String oldTokenUuid = "oldTokenUuid";
+        Claims claimsMock = mock(Claims.class);
+        RefreshToken refreshTokenMock = RefreshToken.builder()
+                .uuid(oldTokenUuid)
+                .status(TokenStatus.REVOKED)
+                .build();
+        TokenFamily tokenFamilyMock = TokenFamily.builder()
+                .refreshTokens(List.of(refreshTokenMock))
+                .build();
+        refreshTokenMock.setFamily(tokenFamilyMock);
+
+        User userMock = User.builder()
+                .tokenFamilies(List.of(tokenFamilyMock))
+                .build();
+
+        var silentLoginRequestDto = new SilentLoginRequestDto("token", UUID.randomUUID().toString());
+        when(jwtService.getPayload(anyString())).thenReturn(claimsMock);
+        when(jwtService.getUuid(eq(claimsMock))).thenReturn(oldTokenUuid);
+        when(refreshTokenService.findByUuid(eq(oldTokenUuid))).thenReturn(refreshTokenMock);
+        ReuseDetectionException reuseDetectionException = assertThrows(
+                ReuseDetectionException.class, () -> authenticationService.silentLogin(silentLoginRequestDto));
+        assertEquals(HACKING_ATTEMPT_DETECTED.getValue(), reuseDetectionException.getMessage());
+
+        verify(tokenFamilyService).blockFamily(tokenFamilyMock);
+        verify(refreshTokenService).revokeAllByFamily(tokenFamilyMock);
+        verify(trustedDeviceService).deleteByUserAndDeviceId(eq(silentLoginRequestDto.deviceId()), any());
+    }
+
+    @Test
+    void successLogOut() {
+        Claims claimsMock = mock(Claims.class);
+        String oldTokenUuid = "oldTokenUuid";
+        var logoutRequestDto = new LogoutRequestDto(oldTokenUuid, UUID.randomUUID().toString());
+        RefreshToken refreshTokenMock = RefreshToken.builder()
+                .uuid(oldTokenUuid)
+                .status(TokenStatus.CREATED)
+                .build();
+        TokenFamily tokenFamilyMock = TokenFamily.builder()
+                .refreshTokens(List.of(refreshTokenMock))
+                .build();
+        refreshTokenMock.setFamily(tokenFamilyMock);
+
+        when(jwtService.getPayload(anyString())).thenReturn(claimsMock);
+        when(jwtService.getUuid(eq(claimsMock))).thenReturn(oldTokenUuid);
+        when(refreshTokenService.findByUuid(eq(oldTokenUuid))).thenReturn(refreshTokenMock);
+        doNothing().when(tokenFamilyService).blockFamily(eq(tokenFamilyMock));
+        doNothing().when(refreshTokenService).revoke(eq(refreshTokenMock));
+
+        assertDoesNotThrow(() -> authenticationService.logout(logoutRequestDto));
+    }
+
+    @Test
+    void failureLogout() {
+        Claims claimsMock = mock(Claims.class);
+        String oldTokenUuid = "oldTokenUuid";
+        var logoutRequestDto = new LogoutRequestDto(oldTokenUuid, UUID.randomUUID().toString());
+        RefreshToken refreshTokenMock = RefreshToken.builder()
+                .uuid(oldTokenUuid)
+                .status(TokenStatus.REVOKED)
+                .build();
+        TokenFamily tokenFamilyMock = TokenFamily.builder()
+                .refreshTokens(List.of(refreshTokenMock))
+                .build();
+        refreshTokenMock.setFamily(tokenFamilyMock);
+
+        when(jwtService.getPayload(anyString())).thenReturn(claimsMock);
+        when(jwtService.getUuid(eq(claimsMock))).thenReturn(oldTokenUuid);
+        when(refreshTokenService.findByUuid(eq(oldTokenUuid))).thenReturn(refreshTokenMock);
+
+        ReuseDetectionException reuseDetectionException = assertThrows(
+                ReuseDetectionException.class, () -> authenticationService.logout(logoutRequestDto));
+        assertEquals(HACKING_ATTEMPT_DETECTED.getValue(), reuseDetectionException.getMessage());
+
+        verify(tokenFamilyService).blockFamily(tokenFamilyMock);
+        verify(refreshTokenService).revokeAllByFamily(tokenFamilyMock);
+        verify(trustedDeviceService).deleteByUserAndDeviceId(eq(logoutRequestDto.deviceId()), any());
+    }
+
 }

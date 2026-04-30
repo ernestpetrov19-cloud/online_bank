@@ -58,12 +58,13 @@ logging:
       max-file-size: 5MB
 
 jwt:
-  lifetime: 15m
+  access-token-lifetime: 15m
+  refresh-token-lifetime: 30d
+  id-token-lifetime: 30d
   not-before: 10s
+  filename: ${JWT_SECRET_FILE_NAME}
   audience: "online_bank audience"
   issuer: "com.example"
-  secret-file-name: ${JWT_SECRET_FILE_NAME}
-  refresh-token-life-time: 30d
 
 app:
   cors:

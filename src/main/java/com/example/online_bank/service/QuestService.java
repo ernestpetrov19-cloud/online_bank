@@ -1,7 +1,7 @@
 package com.example.online_bank.service;
 
 import com.example.online_bank.domain.dto.QuestResponseDto;
-import com.example.online_bank.domain.dto.UserQuestWithProgress;
+import com.example.online_bank.domain.dto.UserQuestResponseDto;
 import com.example.online_bank.domain.entity.Quest;
 import com.example.online_bank.domain.entity.User;
 import com.example.online_bank.domain.entity.UserCategoryStats;
@@ -84,7 +84,7 @@ public class QuestService {
         return random.nextInt(2, 6);
     }
 
-    public List<UserQuestWithProgress> findAllByUserQuest(UUID userUuid) {
+    public List<UserQuestResponseDto> findAllByUserQuest(UUID userUuid) {
         User user = userService.findByUuid(userUuid).orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
         List<UserCategoryStats> allStats = userStatsService.findAllByUser(user);
         Map<PartnerCategory, Integer> categoryPointsByStat = allStats.stream()
@@ -104,8 +104,8 @@ public class QuestService {
     }
 
 
-    private UserQuestWithProgress createUserProgress(UserQuest userQuest, Quest quest, Integer countSpendInMonth) {
-        return new UserQuestWithProgress(
+    private UserQuestResponseDto createUserProgress(UserQuest userQuest, Quest quest, Integer countSpendInMonth) {
+        return new UserQuestResponseDto(
                 generateQuestName(quest),
                 quest.getCategory(),
                 quest.getDateOfExpiry(),

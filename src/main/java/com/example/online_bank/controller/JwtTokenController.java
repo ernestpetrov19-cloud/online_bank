@@ -21,7 +21,7 @@ public class JwtTokenController {
 
     @PostMapping("/get-access-token")
     public ResponseEntity<String> regenerateToken(@RequestParam String email) {
-        User user = userService.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userService.findByEmail(email);
         UserContainer userContainer = new UserContainer(user.getUuid().toString(), user.getName(), user.getRoles().stream().map(Role::getName).toList());
         return ResponseEntity.status(200).body(tokenService.getAccessToken(userContainer));
     }

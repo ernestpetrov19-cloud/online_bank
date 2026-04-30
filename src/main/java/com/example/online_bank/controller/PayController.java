@@ -2,7 +2,7 @@ package com.example.online_bank.controller;
 
 import com.example.online_bank.domain.dto.OperationDtoResponse;
 import com.example.online_bank.domain.dto.PayDtoRequest;
-import com.example.online_bank.domain.model.JwtUserDetails;
+import com.example.online_bank.security.userdetails.JwtUserDetails;
 import com.example.online_bank.service.PayService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

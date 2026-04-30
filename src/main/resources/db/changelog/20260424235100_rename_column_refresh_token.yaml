@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260424235100_rename_column_refresh_token.yaml
+      author: gilmanovamir
+      changes:
+        - renameColumn:
+            tableName: refresh_token
+            oldColumnName: uuid_hash
+            newColumnName: uuid

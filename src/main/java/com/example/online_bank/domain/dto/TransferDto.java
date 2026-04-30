@@ -2,8 +2,6 @@ package com.example.online_bank.domain.dto;
 
 import java.math.BigDecimal;
 
-import com.example.online_bank.domain.dto.*;
-
 /**
  * DTO для перевода средств между клиентами.
  * Имя банка указывается у каждого клиента отдельно
@@ -16,6 +14,10 @@ import com.example.online_bank.domain.dto.*;
  *                               в его же валюте
  * @param description            Описание к операции
  */
-public record TransferDto(SenderInfo senderInfo, RecipientInfo recipientInfo, BigDecimal recipientRequestAmount,
-                          String description) {
+public record TransferDto(
+        SenderInfo senderInfo,
+        RecipientInfo recipientInfo,
+        BigDecimal recipientRequestAmount,
+        String description
+) {
 }

@@ -69,3 +69,13 @@ databaseChangeLog:
       file: db/changelog/20260219150320_seeding_quest.xml
   - include:
       file: db/changelog/20260405224100_update_column_exchange_rate.yaml
+  - include:
+      file: db/changelog/20260421224300_create_table_device_challenge.yaml
+  - include:
+      file: db/changelog/20260424235100_rename_column_refresh_token.yaml
+  - include:
+      file: db/changelog/20260425164700_rename_verified_code.yaml
+  - include:
+      file: db/changelog/20260425184700_rename_column_verification_code.yaml
+  - include:
+      file: db/changelog/20260425184800_add_column_device_challenges.yaml

@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260425184700_rename_column_verification_code.yaml
+      author: gilmanovamir
+      changes:
+        - renameColumn:
+            tableName: verification_code
+            oldColumnName: verified_code
+            newColumnName: verification_code

@@ -2,13 +2,11 @@ package com.example.online_bank.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.ToString;
 
 @Getter
-@ToString
 @AllArgsConstructor
 public enum SecurityMessage {
-    SECURITY_MESSAGE("Обнаружена попытка взлома! Рекомендуем срочно сменить пароли"),
+    HACKING_ATTEMPT_DETECTED("Обнаружена попытка взлома! Рекомендуем срочно сменить пароль"),
     CONFIRM_LOGIN_MESSAGE("Подтвердите вход с нового устройства, введя проверочный код");
 
     private final String value;

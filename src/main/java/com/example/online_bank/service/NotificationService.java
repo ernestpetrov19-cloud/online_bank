@@ -3,5 +3,10 @@ package com.example.online_bank.service;
 
 public interface NotificationService {
 
-    void sendOtpCode(String destination, String verificationCode, String bodyText);
+    /**
+     * @param to      Кому отправить письмо
+     * @param subject Заголовок письма
+     * @param body    Содержимое письма
+     */
+    void sendVerificationCode(String to, String subject, String body);
 }

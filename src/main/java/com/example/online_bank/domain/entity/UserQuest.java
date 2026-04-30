@@ -4,6 +4,10 @@ package com.example.online_bank.domain.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import static jakarta.persistence.FetchType.EAGER;
+import static jakarta.persistence.FetchType.LAZY;
+import static jakarta.persistence.GenerationType.IDENTITY;
+
 /**
  * Сущность UserQuest (Связка и прогресс)
  * Эта таблица «раздает» квесты конкретным людям.
@@ -17,15 +21,15 @@ import lombok.*;
 @Builder
 public class UserQuest {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "quest_id")
+    @ManyToOne(fetch = EAGER)
+    @JoinColumn(name = "quest_id", referencedColumnName = "id")
     private Quest quest;
 
     @Column()

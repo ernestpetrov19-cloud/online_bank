@@ -1,27 +1,29 @@
 package com.example.online_bank.controller;
 
-import com.example.online_bank.domain.dto.RegenerateOtpDto;
-import com.example.online_bank.service.VerifiedCodeService;
+import com.example.online_bank.domain.dto.RegenerateVerifiedCodeDto;
+import com.example.online_bank.service.VerificationManager;
+import com.example.online_bank.service.domain.VerificationCodeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/code")
+@RequestMapping("/api/otpCode")
 @RequiredArgsConstructor
 public class VerifiedCodeController {
-    private final VerifiedCodeService verifiedCodeService;
+    private final VerificationManager verificationManager;
+    private final VerificationCodeService verificationCodeService;
 
     @DeleteMapping
     @PreAuthorize("hasRole('ADMIN')")
     public void deleteOldCode() {
-        verifiedCodeService.clearOldCodes();
+        verificationCodeService.clearOldCodes();
     }
 
     @PatchMapping("/update/otp")
-    public ResponseEntity<Void> regenerateCode(@RequestBody RegenerateOtpDto dto) {
-        verifiedCodeService.regenerateOtp(dto);
+    public ResponseEntity<Void> regenerateCode(@RequestBody RegenerateVerifiedCodeDto dto) {
+        verificationManager.regenerateOtp(dto);
         return ResponseEntity.ok().build();
     }
 }

@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 
 /**
- * Создать курс. Например, доллар/рубль 90, то есть за один доллар можно получить 90 рублей
+ * Создать курс. Н-р, доллар/рубль 90, то есть за один доллар можно получить 90 рублей
  *
  * @param baseCurrency   Базовая валюта
  * @param targetCurrency Котируемая валюта

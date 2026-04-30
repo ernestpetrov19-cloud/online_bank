@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260425164700_rename_verified_code.yaml
+      author: gilmanovamir
+      changes:
+        - renameTable:
+            oldTableName: verified_code
+            newTableName: verification_code

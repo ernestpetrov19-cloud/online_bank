@@ -1,10 +1,13 @@
 package com.example.online_bank.service;
 
 import com.example.online_bank.domain.dto.RegistrationDtoRequest;
-import com.example.online_bank.domain.event.SendOtpEvent;
+import com.example.online_bank.domain.event.SendVerificationCodeEvent;
+import com.example.online_bank.enums.BodyMessage;
+import com.example.online_bank.enums.SubjectMessage;
 import com.example.online_bank.exception.EntityAlreadyExistsException;
 import com.example.online_bank.mapper.UserMapper;
 import com.example.online_bank.repository.UserRepository;
+import com.example.online_bank.service.domain.VerificationCodeService;
 import com.example.online_bank.service.processor.RegistrationProcessor;
 import org.apache.commons.lang3.function.TriFunction;
 import org.junit.jupiter.api.Assertions;
@@ -14,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -33,11 +37,11 @@ class RegistrationServiceTest {
     @Mock
     private RoleService roleService;
     @Mock
-    private VerifiedCodeService verifiedCodeService;
+    private VerificationCodeService verificationCodeService;
     @Mock
     private RegistrationProcessor registrationProcessor;
     @Mock
-    private EventPublisherService eventPublisherService;
+    ApplicationEventPublisher applicationEventPublisher;
     @InjectMocks
     private RegistrationService registrationService;
 
@@ -53,13 +57,13 @@ class RegistrationServiceTest {
                 "myemail@test.com"
         );
 
-        SendOtpEvent mockEvent = new SendOtpEvent("myemail@test.com", "1234", "some text");
+        SendVerificationCodeEvent mockEvent = new SendVerificationCodeEvent("myemail@test.com", "1234", SubjectMessage.VERIFICATION, BodyMessage.VERIFICATION_BODY);
 
         when(registrationProcessor.register(Mockito.eq(request), any(TriFunction.class)))
                 .thenReturn(mockEvent);
         Assertions.assertDoesNotThrow(() -> registrationService.signUp(request));
 
-        verify(eventPublisherService).publishEvent(mockEvent);
+        verify(applicationEventPublisher).publishEvent(mockEvent);
     }
 
     @Test
@@ -76,7 +80,7 @@ class RegistrationServiceTest {
         when(registrationProcessor.register(any(RegistrationDtoRequest.class), any(TriFunction.class)))
                 .thenThrow(EntityAlreadyExistsException.class);
         assertThrows(EntityAlreadyExistsException.class, () -> registrationService.signUp(registrationDtoRequest));
-        verifyNoInteractions(eventPublisherService);
+        verifyNoInteractions(applicationEventPublisher);
     }
 
     @Test
@@ -93,6 +97,6 @@ class RegistrationServiceTest {
         when(registrationProcessor.register(any(RegistrationDtoRequest.class), any(TriFunction.class)))
                 .thenThrow(EntityAlreadyExistsException.class);
         assertThrows(EntityAlreadyExistsException.class, () -> registrationService.signUp(request));
-        verifyNoInteractions(eventPublisherService);
+        verifyNoInteractions(applicationEventPublisher);
     }
 }

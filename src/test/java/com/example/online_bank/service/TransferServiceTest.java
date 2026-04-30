@@ -21,6 +21,8 @@ import java.time.LocalDateTime;
 import static com.example.online_bank.enums.CurrencyCode.RUB;
 import static com.example.online_bank.enums.CurrencyCode.USD;
 import static com.example.online_bank.enums.OperationType.WITHDRAW;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -48,17 +50,14 @@ class TransferServiceTest {
 
     TransferDto transferDto = new TransferDto
             (
-                    new SenderInfo(
-                            "John",
-                            "Doe",
-                            "D",
-                            "0001"
-                    ), new RecipientInfo(
-                    "0002",
-                    "TestBankName"
-            ), BigDecimal.valueOf(100), "test"
+                    new SenderInfo("0001"),
+                    new RecipientInfo(
+                            "0002",
+                            "TestBankName"
+                    ),
+                    BigDecimal.valueOf(100),
+                    "test"
             );
-
 
     @Test
     void successTransferMoney_CurrencyCodeEquals() {
@@ -69,8 +68,8 @@ class TransferServiceTest {
                 .thenReturn(new ResponseEntity<>(mockBankResponse, HttpStatus.CREATED));
 
         OperationDtoResponse result = transferService.transferMoney(transferDto);
-        Assertions.assertEquals(mockBankResponse, result);
-        Assertions.assertEquals(mockBankResponse.currencyCode(), result.currencyCode());
+        assertEquals(mockBankResponse, result);
+        assertEquals(mockBankResponse.currencyCode(), result.currencyCode());
         verify(accountService, times(1)).findCurrencyCode(anyString());
         verify(bankService, times(1)).makePayment(any(FinanceOperationDto.class));
         verify(restTemplate, times(1)).exchange(any(RequestEntity.class), eq(OperationDtoResponse.class));
@@ -86,8 +85,8 @@ class TransferServiceTest {
                 .thenReturn(new ResponseEntity<>(mockBankResponse, HttpStatus.CREATED));
 
         OperationDtoResponse result = transferService.transferMoney(transferDto);
-        Assertions.assertEquals(mockBankResponse, result);
-        Assertions.assertEquals(mockBankResponse.currencyCode(), result.currencyCode());
+        assertEquals(mockBankResponse, result);
+        assertEquals(mockBankResponse.currencyCode(), result.currencyCode());
         verify(accountService, times(1)).findCurrencyCode(anyString());
         verify(bankService, times(1)).makePayment(any(FinanceOperationDto.class));
         verify(restTemplate, times(1)).exchange(any(RequestEntity.class), eq(OperationDtoResponse.class));
@@ -103,13 +102,13 @@ class TransferServiceTest {
                 .thenThrow(HttpClientErrorException.class);
 
         Exception exception = Assertions.assertThrows(Exception.class, () -> transferService.transferMoney(transferDto));
-        Assertions.assertTrue(exception.getMessage().contains("Ошибка при отправке перевода"));
+        assertTrue(exception.getMessage().contains("Ошибка при отправке перевода"));
     }
 
     @Test
     void successGetBankName() {
         when(bank.getName()).thenReturn("testBankName");
         String bankInfo = transferService.getBankInfo();
-        Assertions.assertEquals("testBankName", bankInfo);
+        assertEquals("testBankName", bankInfo);
     }
 }

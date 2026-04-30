@@ -8,20 +8,20 @@
         <sql>
             insert into bank_partner(name, partner_category, account_id)
             values ('Аптека',
-                    'MEDICINE',
-                    (select a.id from account a where a.account_number = '810123456'))
+            'MEDICINE',
+            (select a.id from account a where a.account_number = '810123456'))
         </sql>
         <sql>
             insert into bank_partner(name, partner_category, account_id)
             values ('Супермаркет',
-                    'FOOD',
-                    (select a.id from account a where a.account_number = '810123457'))
+            'FOOD',
+            (select a.id from account a where a.account_number = '810123457'))
         </sql>
         <sql>
             insert into bank_partner(name, partner_category, account_id)
             values ('Кинотеатр',
-                    'ENTERTAINMENT',
-                    (select a.id from account a where a.account_number = '810123458'))
+            'ENTERTAINMENT',
+            (select a.id from account a where a.account_number = '810123458'))
         </sql>
     </changeSet>
 </databaseChangeLog>

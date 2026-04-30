@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/verifiedUser")
 @RequiredArgsConstructor
 @Tag(name = "Контроллер для операций пользователя", description = "Методы для аутентификации и регистрации")
 public class UserController {

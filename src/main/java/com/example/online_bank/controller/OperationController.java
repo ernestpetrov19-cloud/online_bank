@@ -2,7 +2,7 @@ package com.example.online_bank.controller;
 
 import com.example.online_bank.domain.dto.OperationDtoResponse;
 import com.example.online_bank.domain.dto.OperationInfoDto;
-import com.example.online_bank.domain.model.JwtUserDetails;
+import com.example.online_bank.security.userdetails.JwtUserDetails;
 import com.example.online_bank.service.OperationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -54,7 +54,7 @@ public class OperationController {
      *
      * @return вернёт список всех операций для пользователя
      */
-    @GetMapping("/find-all-operation-by-user")
+    @GetMapping("/find-all-operation-by-verifiedUser")
     @Operation(summary = "Просмотреть список всех операций")
     @ApiResponse(responseCode = "200",
             content = @Content(

@@ -24,14 +24,7 @@ class MailServiceTest {
         String to = "test2@mail.com";
 
         Assertions.assertNotNull(mailService.getFromTo());
-        Assertions.assertDoesNotThrow(() -> mailService.sendMail(to, "qwer", "qwe"));
+        Assertions.assertDoesNotThrow(() -> mailService.send(to, "qwer", "qwe"));
     }
 
-    @Test
-    void failedSendMail() {
-        String to = "test2@mail.com";
-
-        Assertions.assertNull(mailService.getFromTo());
-        Assertions.assertThrows(NullPointerException.class, () -> mailService.sendMail(to, "qwer", "qwe"));
-    }
 }

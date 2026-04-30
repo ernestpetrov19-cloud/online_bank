@@ -4,7 +4,6 @@ import com.example.online_bank.domain.dto.RegistrationDtoRequest;
 import com.example.online_bank.domain.dto.UserContainer;
 import com.example.online_bank.domain.entity.Role;
 import com.example.online_bank.domain.entity.User;
-import com.example.online_bank.domain.event.SendOtpEvent;
 import com.example.online_bank.service.RoleService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -104,15 +103,5 @@ public class UserMapperTest {
         assertFalse(userAdmin.getIsVerified());
         assertArrayEquals(roles.toArray(), userAdmin.getRoles().toArray());
         //verify(bCryptPasswordEncoder).encode(registrationDtoRequest.password());
-    }
-
-    @Test
-    @DisplayName("Успешное конвертирование в registrationDtoResponse")
-    void successfulMapToSendOtpEvent() {
-        String code = "1234";
-        SendOtpEvent sendOtpEvent = userMapper.toSendOtpEvent(registrationDtoRequest, code);
-
-        assertEquals(code, sendOtpEvent.code());
-        assertEquals("testEmail@.com", sendOtpEvent.email());
     }
 }

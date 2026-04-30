@@ -1,7 +1,7 @@
 package com.example.online_bank.security.provider;
 
-import com.example.online_bank.domain.model.JwtUserDetails;
-import com.example.online_bank.security.token.JwtRequestToken;
+import com.example.online_bank.security.token.JwtAuthenticationToken;
+import com.example.online_bank.security.userdetails.JwtUserDetails;
 import com.example.online_bank.service.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -31,8 +31,8 @@ public class JwtRequestProvider implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         log.info("Начало работы фильтра jwt аутентификации");
 
-        JwtRequestToken jwtRequestToken = (JwtRequestToken) authentication;
-        String token = jwtRequestToken.getToken();
+        JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken) authentication;
+        String token = jwtAuthenticationToken.getToken();
         try {
             Claims jwtClaims = jwtService.getPayload(token);
 
@@ -44,7 +44,7 @@ public class JwtRequestProvider implements AuthenticationProvider {
             JwtUserDetails details = new JwtUserDetails(uuid, username, authorities);
             log.trace("Возвращаем аутентифицированный токен {}", details);
 
-            return new JwtRequestToken(authorities, details);
+            return new JwtAuthenticationToken(authorities, details);
         } catch (JwtException e) {
             log.error(e.getMessage());
             throw new BadCredentialsException("Неверный или просроченный токен");
@@ -56,6 +56,6 @@ public class JwtRequestProvider implements AuthenticationProvider {
      */
     @Override
     public boolean supports(Class<?> authentication) {
-        return JwtRequestToken.class.isAssignableFrom(authentication);
+        return JwtAuthenticationToken.class.isAssignableFrom(authentication);
     }
 }

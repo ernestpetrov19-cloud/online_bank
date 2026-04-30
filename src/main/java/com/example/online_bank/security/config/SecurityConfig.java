@@ -48,7 +48,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authRequestManager ->
                         authRequestManager
                                 .requestMatchers(
-                                        "/api/code/update/otp",
+                                        "/api/otpCode/update/otp",
                                         "/api/sign-up",
                                         "/api/sign-up/admin",
                                         "/api/first-auth-verify/**",
@@ -101,11 +101,12 @@ public class SecurityConfig {
 
         // РЕЖИМ "ПУСКАТЬ ВСЕХ":
         configuration.setAllowedOriginPatterns(List.of("*"));
-//        configuration.setAllowedOrigins(List.of(
-//                "https://online-bank-hyper-revolution-comput.vercel.app/",
-//                "https://online-bank-hyper-revolution-git-cf49f5-amirgilmanovs-projects.vercel.app/",
-//                "https://online-bank-hyper-revolution-computer-systems-iillnjp9z.vercel.app/"
-//        ));
+        configuration.setAllowedOrigins(List.of(
+                "https://online-bank-hyper-revolution-comput.vercel.app/",
+                "https://online-bank-hyper-revolution-git-cf49f5-amirgilmanovs-projects.vercel.app/",
+                "https://online-bank-hyper-revolution-computer-systems-iillnjp9z.vercel.app/",
+                "http://localhost:3000/"
+        ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true); // Для JWT/Cookies

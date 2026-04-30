@@ -2,6 +2,7 @@ package com.example.online_bank.service;
 
 import com.example.online_bank.exception.InvertedRateNotFoundException;
 import com.example.online_bank.repository.ExchangeCurrencyRepository;
+import com.example.online_bank.service.impl.LocalDataBaseCurrencyRateProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

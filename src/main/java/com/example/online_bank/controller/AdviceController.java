@@ -1,6 +1,7 @@
 package com.example.online_bank.controller;
 
 import com.example.online_bank.domain.dto.EmptyDeviceResponseDto;
+import com.example.online_bank.domain.dto.VerifyRequiredResponseDto;
 import com.example.online_bank.exception.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.apache.coyote.BadRequestException;
@@ -17,15 +18,6 @@ import static org.springframework.http.HttpStatus.*;
 
 @RestControllerAdvice
 public class AdviceController {
-
-    /**
-     * @param e Обработка ошибки при ошибке аутентификации
-     * @return 401 HTTP статус
-     */
-    @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<String> handleUserAuthenticationExceptionException(Exception e) {
-        return new ResponseEntity<>(e.getMessage(), UNAUTHORIZED);
-    }
 
     /**
      * @param e Обработка ошибки при ненахождении курса
@@ -61,7 +53,7 @@ public class AdviceController {
 
     /**
      * @param e Обработка ошибки в случае возникновения ошибки отправке запроса
-     * @return 500  HTTP статус
+     * @return 500 HTTP статус
      */
     @ExceptionHandler(TransferException.class)
     public ResponseEntity<String> handleTransferException(Exception e) {
@@ -78,28 +70,23 @@ public class AdviceController {
         return new ResponseEntity<>(e.getMessage(), BAD_REQUEST);
     }
 
-    @ExceptionHandler(InvalidCountException.class)
-    public ResponseEntity<String> handleInvalidRateException(Exception e) {
-        return new ResponseEntity<>(e.getMessage(), BAD_REQUEST);
+    /**
+     * @param e обработка ошибки когда произошла неизвестная ошибка
+     * @return 503 HTTP статус
+     */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleApiException(Exception e) {
+        return ResponseEntity.status(SERVICE_UNAVAILABLE)
+                .body("Сервис временно не работает, но мы работаем над этим");
     }
-
-    @ExceptionHandler(EntityAlreadyVerifiedException.class)
-    public ResponseEntity<String> handleEntityAlreadyVerifiedException(Exception e) {
-        return new ResponseEntity<>(e.getMessage(), CONFLICT);
-    }
-
-//    /**
-//     * @param e обработка ошибки когда произошла неизвестная ошибка
-//     * @return 503 HTTP статус
-//     */
-//    @ExceptionHandler(Exception.class)
-//    public ResponseEntity<String> handleApiException(Exception e) {
-//        return ResponseEntity.status(SERVICE_UNAVAILABLE)
-//                .body("Сервис временно не работает, но мы работаем над этим");
-//    }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<String> handleBadCredentialsException(Exception e) {
+        return new ResponseEntity<>(e.getMessage(), BAD_REQUEST);
+    }
+
+    @ExceptionHandler(VerificationOtpException.class)
+    public ResponseEntity<String> handleVerificationOtpException(Exception e) {
         return new ResponseEntity<>(e.getMessage(), BAD_REQUEST);
     }
 
@@ -135,15 +122,18 @@ public class AdviceController {
     }
 
     @ExceptionHandler(UserAgentNotEqualException.class)
-    public ResponseEntity<Map<String, String>> handleUserAgentNotEqualException(UserAgentNotEqualException e) {
-        Map<String, String> response = new HashMap<>();
-        response.put("message", e.getMessage());
-        response.put("action", "VERIFY_REQUIRED");
-        return ResponseEntity.status(FORBIDDEN).body(response);
+    public ResponseEntity<VerifyRequiredResponseDto> handleUserAgentNotEqualException(UserAgentNotEqualException e) {
+        VerifyRequiredResponseDto responseDto = new VerifyRequiredResponseDto(e.getMessage(), "VERIFY_REQUIRED");
+        return ResponseEntity.status(OK).body(responseDto);
     }
 
     @ExceptionHandler(InvertedRateNotFoundException.class)
     public ResponseEntity<String> handleInvertedRateNotFoundException(Exception e) {
         return ResponseEntity.status(NOT_FOUND).body(e.getMessage());
+    }
+
+    @ExceptionHandler(ReuseDetectionException.class)
+    public ResponseEntity<String> handleReuseDetectionException(Exception e) {
+        return ResponseEntity.status(BAD_REQUEST).body(e.getMessage());
     }
 }

@@ -1,0 +1,24 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260421224300_create_table_device_challenge.yaml
+      author: amirgilmanov
+      changes:
+        - createTable:
+            tableName: device_challenge
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: device_name
+                  type: varchar(100)
+              - column:
+                  name: device_id
+                  type: varchar(250)
+              - column:
+                  name: user_agent
+                  type: varchar(500)

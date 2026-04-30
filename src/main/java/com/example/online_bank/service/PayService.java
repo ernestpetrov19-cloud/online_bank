@@ -43,16 +43,15 @@ public class PayService {
                         partnerAccountCurrencyCode)
         );
 
-        if (senderOperationResponse != null) {
-            UpdateUserStatEvent updateUserStatEvent = new UpdateUserStatEvent(
-                    user,
-                    payDtoRequest.category(),
-                    payDtoRequest.serviceRequestAmount(),
-                    LocalDate.now(),
-                    userAccountNumber
-            );
-            applicationEventPublisher.publishEvent(updateUserStatEvent);
-        }
+        // обновление статистики пользователя
+        UpdateUserStatEvent updateUserStatEvent = new UpdateUserStatEvent(
+                user,
+                payDtoRequest.category(),
+                payDtoRequest.serviceRequestAmount(),
+                LocalDate.now(),
+                userAccountNumber
+        );
+        applicationEventPublisher.publishEvent(updateUserStatEvent);
 
         //пополняем счет партнера/сервиса
         FinanceOperationDto serviceDto = createRecipientDto(payDtoRequest, partnerAccountCurrencyCode, description);

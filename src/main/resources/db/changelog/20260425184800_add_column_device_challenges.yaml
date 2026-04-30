@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260425184800_add_column_device_challenges.yaml
+      author: gilmanovamir
+      changes:
+        - addColumn:
+            tableName: device_challenge
+            columns:
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    referencedTableName: user_bank
+                    referencedColumnNames: id
+                    foreignKeyName: fk_device_challenge_user_bank

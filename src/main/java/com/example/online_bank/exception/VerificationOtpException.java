@@ -3,5 +3,5 @@ package com.example.online_bank.exception;
 import lombok.experimental.StandardException;
 
 @StandardException
-public class VerificationOtpException extends Exception {
+public class VerificationOtpException extends RuntimeException {
 }

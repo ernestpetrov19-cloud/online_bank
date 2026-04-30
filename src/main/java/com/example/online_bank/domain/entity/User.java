@@ -70,7 +70,7 @@ public class User {
 
     @ToString.Exclude
     @OneToMany(mappedBy = "user", fetch = LAZY, cascade = REMOVE)
-    private List<VerifiedCode> verifiedCode;
+    private List<VerificationCode> verificationCode;
 
     @ManyToMany()
     @ToString.Exclude
@@ -96,4 +96,8 @@ public class User {
     @ToString.Exclude
     @OneToMany(fetch = LAZY, mappedBy = "user", cascade = REMOVE)
     private List<UserQuest> userQuest;
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "user", cascade = REMOVE)
+    private List<DeviceChallenge> deviceChallenges;
 }

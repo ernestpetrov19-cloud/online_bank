@@ -2,7 +2,7 @@ package com.example.online_bank.controller;
 
 import com.example.online_bank.domain.dto.BuyCurrencyDto;
 import com.example.online_bank.domain.dto.FinanceOperationDto;
-import com.example.online_bank.domain.dto.OperationDtoResponse;
+import com.example.online_bank.domain.dto.OperationInfoDto;
 import com.example.online_bank.service.BankService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -38,12 +38,12 @@ public class BankController {
             responseCode = "200",
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = OperationDtoResponse.class)
+                    schema = @Schema(implementation = OperationInfoDto.class)
             )
     )
     @PreAuthorize("@accountSecurity.isOwner(#dto.accountNumber(), authentication.principal.uuid)")
     @PostMapping("/receive")
-    public ResponseEntity<OperationDtoResponse> receive(@RequestBody FinanceOperationDto dto) {
+    public ResponseEntity<OperationInfoDto> receive(@RequestBody FinanceOperationDto dto) {
         return ResponseEntity.status(201).body(bankService.makeDeposit(dto));
     }
 
@@ -60,7 +60,7 @@ public class BankController {
     )
     @PreAuthorize("@accountSecurity.isOwner(#dto.accountNumber(), authentication.principal.uuid)")
     @PostMapping("/withdraw")
-    public ResponseEntity<OperationDtoResponse> withdraw(@RequestBody FinanceOperationDto dto) {
+    public ResponseEntity<OperationInfoDto> withdraw(@RequestBody FinanceOperationDto dto) {
         return ResponseEntity.status(201).body(bankService.makePayment(dto));
     }
 
@@ -75,7 +75,7 @@ public class BankController {
     @Operation(summary = "Купить валюту с одного счёта на другой")
     @ApiResponse(responseCode = "200", content = @Content(mediaType = "text/plain", schema = @Schema(implementation = BigDecimal.class)))
 
-    public List<OperationDtoResponse> buyCurrency(@RequestBody BuyCurrencyDto dto) {
+    public List<OperationInfoDto> buyCurrency(@RequestBody BuyCurrencyDto dto) {
         return bankService.buyCurrency(dto);
     }
 }

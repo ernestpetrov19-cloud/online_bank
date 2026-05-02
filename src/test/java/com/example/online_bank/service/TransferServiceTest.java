@@ -39,11 +39,12 @@ class TransferServiceTest {
     AccountService accountService;
     @Mock
     BankService bankService;
-    OperationDtoResponse mockBankResponse = new OperationDtoResponse(
-            "0002",
-            LocalDateTime.now(),
+    OperationInfoDto mockBankResponse = new OperationInfoDto(
             1L,
+            LocalDateTime.now(),
+            "0002",
             WITHDRAW,
+            BigDecimal.TEN,
             "test",
             RUB
     );
@@ -64,15 +65,15 @@ class TransferServiceTest {
         when(bank.getPrefixUrl()).thenReturn("testUrl");
         when(accountService.findCurrencyCode(Mockito.anyString())).thenReturn(RUB);
         when(bankService.makePayment(any(FinanceOperationDto.class))).thenReturn(mockBankResponse);
-        when(restTemplate.exchange(any(RequestEntity.class), eq(OperationDtoResponse.class)))
+        when(restTemplate.exchange(any(RequestEntity.class), eq(OperationInfoDto.class)))
                 .thenReturn(new ResponseEntity<>(mockBankResponse, HttpStatus.CREATED));
 
-        OperationDtoResponse result = transferService.transferMoney(transferDto);
+        OperationInfoDto result = transferService.transferMoney(transferDto);
         assertEquals(mockBankResponse, result);
         assertEquals(mockBankResponse.currencyCode(), result.currencyCode());
         verify(accountService, times(1)).findCurrencyCode(anyString());
         verify(bankService, times(1)).makePayment(any(FinanceOperationDto.class));
-        verify(restTemplate, times(1)).exchange(any(RequestEntity.class), eq(OperationDtoResponse.class));
+        verify(restTemplate, times(1)).exchange(any(RequestEntity.class), eq(OperationInfoDto.class));
         verify(bank, times(1)).getPrefixUrl();
     }
 
@@ -81,15 +82,15 @@ class TransferServiceTest {
         when(bank.getPrefixUrl()).thenReturn("testUrl");
         when(accountService.findCurrencyCode(Mockito.anyString())).thenReturn(USD);
         when(bankService.makePayment(any(FinanceOperationDto.class))).thenReturn(mockBankResponse);
-        when(restTemplate.exchange(any(RequestEntity.class), eq(OperationDtoResponse.class)))
+        when(restTemplate.exchange(any(RequestEntity.class), eq(OperationInfoDto.class)))
                 .thenReturn(new ResponseEntity<>(mockBankResponse, HttpStatus.CREATED));
 
-        OperationDtoResponse result = transferService.transferMoney(transferDto);
+        OperationInfoDto result = transferService.transferMoney(transferDto);
         assertEquals(mockBankResponse, result);
         assertEquals(mockBankResponse.currencyCode(), result.currencyCode());
         verify(accountService, times(1)).findCurrencyCode(anyString());
         verify(bankService, times(1)).makePayment(any(FinanceOperationDto.class));
-        verify(restTemplate, times(1)).exchange(any(RequestEntity.class), eq(OperationDtoResponse.class));
+        verify(restTemplate, times(1)).exchange(any(RequestEntity.class), eq(OperationInfoDto.class));
         verify(bank, times(1)).getPrefixUrl();
     }
 
@@ -98,7 +99,7 @@ class TransferServiceTest {
         when(bank.getPrefixUrl()).thenReturn("testUrl");
         when(accountService.findCurrencyCode(Mockito.anyString())).thenReturn(RUB);
         when(bankService.makePayment(any(FinanceOperationDto.class))).thenReturn(mockBankResponse);
-        when(restTemplate.exchange(any(RequestEntity.class), eq(OperationDtoResponse.class)))
+        when(restTemplate.exchange(any(RequestEntity.class), eq(OperationInfoDto.class)))
                 .thenThrow(HttpClientErrorException.class);
 
         Exception exception = Assertions.assertThrows(Exception.class, () -> transferService.transferMoney(transferDto));

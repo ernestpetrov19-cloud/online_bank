@@ -2,7 +2,7 @@ package com.example.online_bank.service;
 
 import com.example.online_bank.domain.dto.BuyCurrencyDto;
 import com.example.online_bank.domain.dto.FinanceOperationDto;
-import com.example.online_bank.domain.dto.OperationDtoResponse;
+import com.example.online_bank.domain.dto.OperationInfoDto;
 import com.example.online_bank.enums.CurrencyCode;
 import com.example.online_bank.mapper.OperationMapper;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class BankService {
      * @return Возвращает информацию об операции списания со счета
      */
     @Transactional()
-    public OperationDtoResponse makePayment(FinanceOperationDto dto) {
+    public OperationInfoDto makePayment(FinanceOperationDto dto) {
         CurrencyCode accountCurrencyCode = accountService.findCurrencyCode(dto.accountNumber());
 
         BigDecimal finalAmount = validateCurrencyService.processTransaction(
@@ -45,7 +45,7 @@ public class BankService {
                 dto.amount()
         );
 
-        return operationMapper.toWithdrawOperationDto(operationService.createOperation(
+        return operationMapper.toOperationInfoDto(operationService.createOperation(
                 LocalDateTime.now(),
                 WITHDRAW,
                 finalAmount,
@@ -63,7 +63,7 @@ public class BankService {
      * @return Возвращает информацию об операции пополнении счета
      */
     @Transactional()
-    public OperationDtoResponse makeDeposit(FinanceOperationDto dto) {
+    public OperationInfoDto makeDeposit(FinanceOperationDto dto) {
         CurrencyCode accountCurrencyCode = accountService.findCurrencyCode(dto.accountNumber());
 
         BigDecimal finalAmount = validateCurrencyService.processTransaction(
@@ -74,7 +74,7 @@ public class BankService {
         );
 
         //TODO перевести на ивенты
-        return operationMapper.toDepositOperationDto(operationService.createOperation(
+        return operationMapper.toOperationInfoDto(operationService.createOperation(
                 LocalDateTime.now(),
                 DEPOSIT,
                 finalAmount,
@@ -89,7 +89,7 @@ public class BankService {
      * делает конвертацию в валюту {@code dto.targetAccountNumber}
      */
     @Transactional()
-    public List<OperationDtoResponse> buyCurrency(BuyCurrencyDto dto) {
+    public List<OperationInfoDto> buyCurrency(BuyCurrencyDto dto) {
         CurrencyCode targetCurrencyCode = accountService.findCurrencyCode(dto.targetAccountNumber());
 
         List<String> descriptions = createDescriptions(dto);
@@ -97,14 +97,14 @@ public class BankService {
         final String paymentDescription = descriptions.getFirst();
         final String depositDescription = descriptions.getLast();
 
-        OperationDtoResponse paymentOperation = makePayment(
+        OperationInfoDto paymentOperation = makePayment(
                 new FinanceOperationDto(dto.baseAccountNumber(),
                         dto.amount(),
                         paymentDescription,
                         targetCurrencyCode)
         );
 
-        OperationDtoResponse depositOperation = makeDeposit(new FinanceOperationDto(
+        OperationInfoDto depositOperation = makeDeposit(new FinanceOperationDto(
                 dto.targetAccountNumber(),
                 dto.amount(),
                 depositDescription,

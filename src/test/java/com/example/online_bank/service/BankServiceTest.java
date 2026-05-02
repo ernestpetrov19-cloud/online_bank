@@ -2,7 +2,7 @@ package com.example.online_bank.service;
 
 import com.example.online_bank.domain.dto.BuyCurrencyDto;
 import com.example.online_bank.domain.dto.FinanceOperationDto;
-import com.example.online_bank.domain.dto.OperationDtoResponse;
+import com.example.online_bank.domain.dto.OperationInfoDto;
 import com.example.online_bank.domain.entity.Operation;
 import com.example.online_bank.mapper.OperationMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -54,13 +54,15 @@ class BankServiceTest {
                 .operationType(WITHDRAW)
                 .build();
 
-        OperationDtoResponse operationResponseMock = new OperationDtoResponse(
-                "001",
-                operation.getCreatedAt(),
+        OperationInfoDto operationResponseMock = new OperationInfoDto(
                 operation.getId(),
+                operation.getCreatedAt(),
+                operation.getAccount().getAccountNumber(),
                 operation.getOperationType(),
+                operation.getAmount(),
                 operation.getDescription(),
                 RUB
+
         );
 
         when(accountService.findCurrencyCode("001")).thenReturn((RUB));
@@ -79,12 +81,12 @@ class BankServiceTest {
                         eq("001"),
                         eq(RUB)
                 )).thenReturn(operation);
-        when(operationMapper.toWithdrawOperationDto(any(Operation.class))).thenReturn(operationResponseMock);
-        OperationDtoResponse operationDtoResponse = bankService.makePayment(dtoRq);
+        when(operationMapper.toOperationInfoDto(any(Operation.class))).thenReturn(operationResponseMock);
+        OperationInfoDto operationInfoDto = bankService.makePayment(dtoRq);
 
-        log.info("operationDtoResponse - {}", operationDtoResponse);
-        assertNotNull(operationDtoResponse);
-        assertEquals(dtoRq.accountNumber(), operationDtoResponse.accountNumber());
+        log.info("operationInfoDto - {}", operationInfoDto);
+        assertNotNull(operationInfoDto);
+        assertEquals(dtoRq.accountNumber(), operationInfoDto.accountNumber());
     }
 
     @Test
@@ -100,11 +102,12 @@ class BankServiceTest {
                 .operationType(DEPOSIT)
                 .build();
 
-        OperationDtoResponse operationResponseMock = new OperationDtoResponse(
-                "001",
-                operation.getCreatedAt(),
+        OperationInfoDto operationResponseMock = new OperationInfoDto(
                 operation.getId(),
+                operation.getCreatedAt(),
+                operation.getAccount().getAccountNumber(),
                 operation.getOperationType(),
+                operation.getAmount(),
                 operation.getDescription(),
                 RUB
         );
@@ -126,10 +129,10 @@ class BankServiceTest {
                 eq("001"),
                 eq(RUB)
         )).thenReturn(operation);
-        when(operationMapper.toDepositOperationDto(any(Operation.class))).thenReturn(operationResponseMock);
-        OperationDtoResponse operationDtoResponse = bankService.makeDeposit(dtoRq);
-        assertNotNull(operationDtoResponse);
-        assertEquals(dtoRq.accountNumber(), operationDtoResponse.accountNumber());
+        when(operationMapper.toOperationInfoDto(any(Operation.class))).thenReturn(operationResponseMock);
+        OperationInfoDto operationInfoDto = bankService.makeDeposit(dtoRq);
+        assertNotNull(operationInfoDto);
+        assertEquals(dtoRq.accountNumber(), operationInfoDto.accountNumber());
     }
 
     @Test
@@ -145,15 +148,31 @@ class BankServiceTest {
         final String depositDescription = descriptions.getLast();
 
         LocalDateTime now = LocalDateTime.now();
-        OperationDtoResponse paymentOperationDto = new OperationDtoResponse(dto.baseAccountNumber(), now, 1L, WITHDRAW, paymentDescription, CNY);
+        OperationInfoDto paymentOperationDto = new OperationInfoDto(
+                1L,
+                now,
+                dto.baseAccountNumber(),
+                WITHDRAW,
+               dto.amount(),
+                paymentDescription,
+                CNY);
+
 
         when(bankService.makePayment(new FinanceOperationDto(dto.baseAccountNumber(), dto.amount(), paymentDescription, CNY))).thenReturn(paymentOperationDto);
 
-        OperationDtoResponse depositOperationDto = new OperationDtoResponse(dto.targetAccountNumber(), now, 1L, DEPOSIT, depositDescription, RUB);
+        OperationInfoDto depositOperationDto = new OperationInfoDto(
+                1L,
+                now,
+                dto.targetAccountNumber(),
+                DEPOSIT,
+                dto.amount(),
+                depositDescription,
+                RUB
+        );
         when(bankService.makeDeposit(new FinanceOperationDto(dto.targetAccountNumber(), dto.amount(), depositDescription, RUB))).thenReturn(depositOperationDto);
-        List<OperationDtoResponse> operationDtoResponses = bankService.buyCurrency(dto);
+        List<OperationInfoDto> operationDtoResponses = bankService.buyCurrency(dto);
         log.info("operationDtoResponses - {}", operationDtoResponses);
-        OperationDtoResponse paymentDto = operationDtoResponses.getFirst();
+        OperationInfoDto paymentDto = operationDtoResponses.getFirst();
         log.info("paymentDto - {}", paymentDto);
 
         assertNotNull(operationDtoResponses);

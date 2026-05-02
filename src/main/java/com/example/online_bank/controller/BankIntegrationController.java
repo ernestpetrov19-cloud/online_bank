@@ -1,6 +1,6 @@
 package com.example.online_bank.controller;
 
-import com.example.online_bank.domain.dto.OperationDtoResponse;
+import com.example.online_bank.domain.dto.OperationInfoDto;
 import com.example.online_bank.domain.dto.TransferDto;
 import com.example.online_bank.service.TransferService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,9 +41,9 @@ public class BankIntegrationController {
     @ApiResponse(responseCode = "200",
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = OperationDtoResponse.class))
+                    schema = @Schema(implementation = OperationInfoDto.class))
     )
-    public OperationDtoResponse transfer(@RequestBody TransferDto dto) {
+    public OperationInfoDto transfer(@RequestBody TransferDto dto) {
         return transferService.transferMoney(dto);
     }
 }

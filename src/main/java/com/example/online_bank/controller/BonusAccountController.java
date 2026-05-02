@@ -1,7 +1,7 @@
 package com.example.online_bank.controller;
 
 import com.example.online_bank.domain.dto.ConvertBonusDto;
-import com.example.online_bank.domain.dto.OperationDtoResponse;
+import com.example.online_bank.domain.dto.OperationInfoDto;
 import com.example.online_bank.service.BonusAccountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -29,11 +29,11 @@ public class BonusAccountController {
             responseCode = "200",
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = OperationDtoResponse.class)
+                    schema = @Schema(implementation = OperationInfoDto.class)
             )
     )
     @PreAuthorize("@accountSecurity.isOwner(#dto.accountNumber(), authentication.principal.uuid)")
-    public ResponseEntity<OperationDtoResponse> convert(@RequestBody ConvertBonusDto dto) {
+    public ResponseEntity<OperationInfoDto> convert(@RequestBody ConvertBonusDto dto) {
         return ResponseEntity.status(200)
                 .body(bonusAccountService.convertPoints(dto.accountNumber(), dto.points()));
     }

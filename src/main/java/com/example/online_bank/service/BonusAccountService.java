@@ -1,7 +1,7 @@
 package com.example.online_bank.service;
 
 import com.example.online_bank.domain.dto.FinanceOperationDto;
-import com.example.online_bank.domain.dto.OperationDtoResponse;
+import com.example.online_bank.domain.dto.OperationInfoDto;
 import com.example.online_bank.domain.entity.BonusAccount;
 import com.example.online_bank.enums.CurrencyCode;
 import com.example.online_bank.exception.ConvertBonusException;
@@ -24,7 +24,7 @@ public class BonusAccountService {
         return bonusAccountRepository.findByAccount_AccountNumber(accountNumber).orElseThrow(EntityNotFoundException::new);
     }
 
-    public OperationDtoResponse convertPoints(String accountNumber, BigDecimal amount) {
+    public OperationInfoDto convertPoints(String accountNumber, BigDecimal amount) {
         BonusAccount bonusAccount = bonusAccountRepository.findByAccount_AccountNumber(accountNumber).orElseThrow(
                 () -> new EntityNotFoundException("Счет не существует")
         );

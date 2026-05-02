@@ -1,7 +1,7 @@
 package com.example.online_bank.service;
 
 import com.example.online_bank.domain.dto.FinanceOperationDto;
-import com.example.online_bank.domain.dto.OperationDtoResponse;
+import com.example.online_bank.domain.dto.OperationInfoDto;
 import com.example.online_bank.domain.dto.PayDtoRequest;
 import com.example.online_bank.domain.entity.User;
 import com.example.online_bank.domain.event.UpdateUserStatEvent;
@@ -25,7 +25,7 @@ public class PayService {
     private final UserRepository userRepository;
 
     @Transactional
-    public OperationDtoResponse pay(PayDtoRequest payDtoRequest, UUID userUuid) {
+    public OperationInfoDto pay(PayDtoRequest payDtoRequest, UUID userUuid) {
         CurrencyCode partnerAccountCurrencyCode = bankPartnerService.getAccountCurrencyCode();
 
         User user = userRepository.findByUuid(userUuid).orElseThrow(
@@ -35,7 +35,7 @@ public class PayService {
         //снимаем деньги со счета отправителя
         String description = createDescription(payDtoRequest);
         String userAccountNumber = payDtoRequest.senderInfo().accountNumberFrom();
-        OperationDtoResponse senderOperationResponse = bankService.makePayment(
+        OperationInfoDto senderOperationResponse = bankService.makePayment(
                 new FinanceOperationDto(
                         userAccountNumber,
                         payDtoRequest.serviceRequestAmount(),

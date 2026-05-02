@@ -1,6 +1,5 @@
 package com.example.online_bank.mapper;
 
-import com.example.online_bank.domain.dto.OperationDtoResponse;
 import com.example.online_bank.domain.dto.OperationInfoDto;
 import com.example.online_bank.domain.entity.Account;
 import com.example.online_bank.domain.entity.Operation;
@@ -15,7 +14,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.example.online_bank.enums.CurrencyCode.RUB;
-import static com.example.online_bank.enums.OperationType.WITHDRAW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -23,65 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ExtendWith(SpringExtension.class)
 class OperationMapperTest {
     private final OperationMapper operationMapper = new OperationMapperImpl();
-
-    @Test
-    void toWithdrawOperationDto() {
-        //arrange(подготовка данных)
-        Operation operation = Operation.builder()
-                .id(1L)
-                .createdAt(LocalDateTime.now())
-                .operationType(WITHDRAW)
-                .amount(new BigDecimal("100"))
-                .description("test")
-                .currencyCode(RUB)
-                .build();
-
-        Account account = Account.builder()
-                .accountNumber("0000001111100000")
-                .balance(BigDecimal.valueOf(1000))
-                .currencyCode(RUB)
-                .isBlocked(false)
-                .operations(List.of(operation))
-                .build();
-
-        operation.setAccount(account);
-
-        //Act вызываем метод который мы тестировали
-        OperationDtoResponse withdrawOperationDto = operationMapper.toWithdrawOperationDto(operation);
-        log.info(withdrawOperationDto.toString());
-
-        assertNotNull(withdrawOperationDto);
-    }
-
-    @Test
-    void toDepositOperationDto() {
-        //arrange(подготовка данных)
-        Operation operation = Operation.builder()
-                .id(1L)
-                .createdAt(LocalDateTime.now())
-                .operationType(OperationType.DEPOSIT)
-                .amount(new BigDecimal("100"))
-                .description("test")
-                .currencyCode(RUB)
-                .build();
-
-        Account account = Account.builder()
-                .accountNumber("0000001111100000")
-                .balance(BigDecimal.valueOf(1000))
-                .currencyCode(RUB)
-                .isBlocked(false)
-                .operations(List.of(operation))
-                .build();
-
-        operation.setAccount(account);
-
-        //Act вызываем метод который мы тестировали
-        OperationDtoResponse depositOperationDto = operationMapper.toDepositOperationDto(operation);
-        log.info(depositOperationDto.toString());
-
-        assertNotNull(depositOperationDto);
-        assertEquals(account.getAccountNumber(), depositOperationDto.accountNumber());
-    }
 
     @Test
     void toOperationInfoDto() {

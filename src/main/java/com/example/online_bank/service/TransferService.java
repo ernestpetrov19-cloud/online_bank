@@ -1,7 +1,7 @@
 package com.example.online_bank.service;
 
 import com.example.online_bank.domain.dto.FinanceOperationDto;
-import com.example.online_bank.domain.dto.OperationDtoResponse;
+import com.example.online_bank.domain.dto.OperationInfoDto;
 import com.example.online_bank.domain.dto.TransferDto;
 import com.example.online_bank.domain.model.AbstractBank;
 import com.example.online_bank.enums.CurrencyCode;
@@ -45,12 +45,12 @@ public class TransferService {
      *                    Делает списание со счета отправителя и начисление на счет получателя.
      */
     @Transactional
-    public OperationDtoResponse transferMoney(
+    public OperationInfoDto transferMoney(
             TransferDto transferDto) {
         CurrencyCode recipientCurrencyCode = accountService.findCurrencyCode(transferDto.recipientInfo().accountNumberTo());
 
         //снимаем деньги со счета отправителя
-        OperationDtoResponse senderOperationResponse = bankService.makePayment(
+        OperationInfoDto senderOperationResponse = bankService.makePayment(
                 new FinanceOperationDto(
                         transferDto.senderInfo().accountNumberFrom(),
                         transferDto.recipientRequestAmount(),
@@ -68,7 +68,7 @@ public class TransferService {
         try {
             RequestEntity<FinanceOperationDto> request = RequestEntity.post(url) //создаем запрос
                     .body(dto);
-            restTemplate.exchange(request, OperationDtoResponse.class);
+            restTemplate.exchange(request, OperationInfoDto.class);
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new TransferException("Ошибка при отправке перевода %s".formatted(e.getMessage()));

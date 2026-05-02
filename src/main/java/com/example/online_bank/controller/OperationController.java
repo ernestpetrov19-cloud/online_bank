@@ -1,6 +1,5 @@
 package com.example.online_bank.controller;
 
-import com.example.online_bank.domain.dto.OperationDtoResponse;
 import com.example.online_bank.domain.dto.OperationInfoDto;
 import com.example.online_bank.security.userdetails.JwtUserDetails;
 import com.example.online_bank.service.OperationService;
@@ -36,7 +35,7 @@ public class OperationController {
             responseCode = "200",
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = OperationDtoResponse.class)
+                    schema = @Schema(implementation = OperationInfoDto.class)
             )
     )
     @GetMapping("/find-all-by-account-number")

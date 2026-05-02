@@ -1,6 +1,6 @@
 package com.example.online_bank.controller;
 
-import com.example.online_bank.domain.dto.OperationDtoResponse;
+import com.example.online_bank.domain.dto.OperationInfoDto;
 import com.example.online_bank.domain.dto.PayDtoRequest;
 import com.example.online_bank.security.userdetails.JwtUserDetails;
 import com.example.online_bank.service.PayService;
@@ -21,8 +21,8 @@ public class PayController {
     private final PayService payService;
 
     @PostMapping
-    public ResponseEntity<OperationDtoResponse> pay(@RequestBody PayDtoRequest dto, @AuthenticationPrincipal JwtUserDetails userDetails) {
-        OperationDtoResponse body = payService.pay(dto, UUID.fromString(userDetails.getUuid()));
+    public ResponseEntity<OperationInfoDto> pay(@RequestBody PayDtoRequest dto, @AuthenticationPrincipal JwtUserDetails userDetails) {
+        OperationInfoDto body = payService.pay(dto, UUID.fromString(userDetails.getUuid()));
         return ResponseEntity.ok().body(body);
     }
 }

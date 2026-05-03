@@ -5,8 +5,6 @@ import com.example.online_bank.domain.dto.*;
 import com.example.online_bank.domain.entity.*;
 import com.example.online_bank.domain.event.RelatableUserToQuestEvent;
 import com.example.online_bank.domain.event.SendVerificationCodeEvent;
-import com.example.online_bank.enums.BodyMessage;
-import com.example.online_bank.enums.SubjectMessage;
 import com.example.online_bank.exception.DeviceNotFoundException;
 import com.example.online_bank.exception.ReuseDetectionException;
 import com.example.online_bank.mapper.UserMapper;
@@ -26,10 +24,12 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 
 import static com.example.online_bank.enums.AuthenticationResponseKey.*;
+import static com.example.online_bank.enums.BodyMessage.CONFIRM_LOGIN;
 import static com.example.online_bank.enums.CodeType.EMAIL_AUTHENTICATION;
 import static com.example.online_bank.enums.CodeType.EMAIL_VERIFICATION;
 import static com.example.online_bank.enums.SecurityMessage.CONFIRM_LOGIN_MESSAGE;
 import static com.example.online_bank.enums.SecurityMessage.HACKING_ATTEMPT_DETECTED;
+import static com.example.online_bank.enums.SubjectMessage.AUTHENTICATION;
 import static com.example.online_bank.enums.TokenStatus.REVOKED;
 
 @Slf4j
@@ -89,7 +89,7 @@ public class AuthenticationService {
         VerificationResponseDto verificationResponseDto = verificationManager.verifyUserByEmail(
                 verificationRequestDto.verificationCode(),
                 verificationRequestDto.email(),
-                EMAIL_VERIFICATION
+                EMAIL_AUTHENTICATION
         );
 
         deviceChallengeService.existsByParameters(
@@ -135,8 +135,8 @@ public class AuthenticationService {
             SendVerificationCodeEvent event = new SendVerificationCodeEvent(
                     loginRequest.email(),
                     verificationCode.getVerificationCode(),
-                    SubjectMessage.AUTHENTICATION,
-                    BodyMessage.CONFIRM_LOGIN
+                    AUTHENTICATION,
+                    CONFIRM_LOGIN
             );
             applicationEventPublisher.publishEvent(event);
             return new DeviceNotFoundException(CONFIRM_LOGIN_MESSAGE.getValue());

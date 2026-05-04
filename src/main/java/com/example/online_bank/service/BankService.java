@@ -49,7 +49,7 @@ public class BankService {
         return operationMapper.toOperationInfoDto(operationService.createOperation(
                 LocalDateTime.now(),
                 WITHDRAW,
-                convertedResult.targetConvertedAmount(),
+                dto.amount(),
                 dto.description(),
                 dto.accountNumber(),
                 dto.selectedCurrencyCode())
@@ -80,7 +80,7 @@ public class BankService {
         return operationMapper.toOperationInfoDto(operationService.createOperation(
                 LocalDateTime.now(),
                 DEPOSIT,
-                convertedResult.targetConvertedAmount(),
+                dto.amount(),
                 dto.description(),
                 dto.accountNumber(),
                 dto.selectedCurrencyCode())

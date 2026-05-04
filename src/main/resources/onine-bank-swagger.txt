@@ -1,3 +1,3 @@
 http://localhost:8001/swagger-ui/index.html - сваггер начальный
-http://localhost:8001/api-docs - json версия сайта, (для пропарсивания мб)
+http://localhost:8001/api-docs - json версия сайта
 

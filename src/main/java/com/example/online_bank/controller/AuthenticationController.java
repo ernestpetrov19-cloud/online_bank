@@ -28,7 +28,7 @@ public class AuthenticationController {
      *
      * @return возвращает токен пользователя
      */
-    @PostMapping("first-verify/email")
+    @PostMapping("/first-verify/email")
     @Operation(summary = "Верификация")
     @ApiResponse(responseCode = "200",
             content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))
@@ -43,7 +43,7 @@ public class AuthenticationController {
      *
      * @return возвращает токен пользователя
      */
-    @PostMapping("default-verify/email")
+    @PostMapping("/default-verify/email")
     @Operation(summary = "Верификация")
     @ApiResponse(responseCode = "200",
             content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))

@@ -2,14 +2,15 @@ package com.example.online_bank.service;
 
 
 import com.example.online_bank.domain.dto.*;
-import com.example.online_bank.domain.entity.*;
+import com.example.online_bank.domain.entity.RefreshToken;
+import com.example.online_bank.domain.entity.TokenFamily;
+import com.example.online_bank.domain.entity.TrustedDevice;
+import com.example.online_bank.domain.entity.User;
 import com.example.online_bank.domain.event.RelatableUserToQuestEvent;
-import com.example.online_bank.domain.event.SendVerificationCodeEvent;
 import com.example.online_bank.exception.DeviceNotFoundException;
 import com.example.online_bank.exception.ReuseDetectionException;
 import com.example.online_bank.mapper.UserMapper;
 import com.example.online_bank.security.userdetails.CustomUserDetails;
-import com.example.online_bank.service.domain.VerificationCodeService;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,12 +25,10 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 
 import static com.example.online_bank.enums.AuthenticationResponseKey.*;
-import static com.example.online_bank.enums.BodyMessage.CONFIRM_LOGIN;
 import static com.example.online_bank.enums.CodeType.EMAIL_AUTHENTICATION;
 import static com.example.online_bank.enums.CodeType.EMAIL_VERIFICATION;
 import static com.example.online_bank.enums.SecurityMessage.CONFIRM_LOGIN_MESSAGE;
 import static com.example.online_bank.enums.SecurityMessage.HACKING_ATTEMPT_DETECTED;
-import static com.example.online_bank.enums.SubjectMessage.AUTHENTICATION;
 import static com.example.online_bank.enums.TokenStatus.REVOKED;
 
 @Slf4j
@@ -47,7 +46,7 @@ public class AuthenticationService {
     private final UserMapper userMapper;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final DeviceChallengeService deviceChallengeService;
-    private final VerificationCodeService verificationCodeService;
+    private final DeviceFlowService deviceFlowService;
 
     /**
      * Первый вход
@@ -91,7 +90,7 @@ public class AuthenticationService {
                 verificationRequestDto.email(),
                 EMAIL_AUTHENTICATION
         );
-
+        log.info("Начало проверки device challenge");
         deviceChallengeService.existsByParameters(
                 verificationRequestDto.deviceName(),
                 verificationRequestDto.deviceId(),
@@ -124,21 +123,7 @@ public class AuthenticationService {
                 loginRequest.deviceId(),
                 user
         ).orElseThrow(() -> {
-            log.info("Обнаружено новое устройство");
-            deviceChallengeService.create(
-                    user,
-                    loginRequest.deviceName(),
-                    loginRequest.deviceId(),
-                    loginRequest.userAgent()
-            );
-            VerificationCode verificationCode = verificationCodeService.create(user, EMAIL_AUTHENTICATION);
-            SendVerificationCodeEvent event = new SendVerificationCodeEvent(
-                    loginRequest.email(),
-                    verificationCode.getVerificationCode(),
-                    AUTHENTICATION,
-                    CONFIRM_LOGIN
-            );
-            applicationEventPublisher.publishEvent(event);
+            deviceFlowService.handleNewUserDevice(loginRequest, user);
             return new DeviceNotFoundException(CONFIRM_LOGIN_MESSAGE.getValue());
         });
 

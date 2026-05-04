@@ -17,9 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static com.example.online_bank.util.CodeGeneratorUtil.generateAccountNumber;
 import static java.math.BigDecimal.ZERO;
@@ -109,7 +107,7 @@ public class AccountService {
         List<Account> allAccounts = accountRepository.findAllByHolderUuid(holderUuid);
         if (allAccounts.isEmpty()) {
             log.warn("Нет счетов у пользователя {}", holderUuid);
-            throw new EmptyDataException("Нет счетов у данного пользователя");
+            return List.of();
         }
 
         return allAccounts.stream()

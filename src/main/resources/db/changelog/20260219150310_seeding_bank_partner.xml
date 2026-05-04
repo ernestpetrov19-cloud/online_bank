@@ -7,19 +7,19 @@
     <changeSet id="20260219150310_seeding_bank_partner.xml" author="gilmanovamir">
         <sql>
             insert into bank_partner(name, partner_category, account_id)
-            values ('Аптека',
+            values ('Аптека "Ромашка"',
             'MEDICINE',
             (select a.id from account a where a.account_number = '810123456'))
         </sql>
         <sql>
             insert into bank_partner(name, partner_category, account_id)
-            values ('Супермаркет',
+            values ('Супермаркет "Универсам"',
             'FOOD',
             (select a.id from account a where a.account_number = '810123457'))
         </sql>
         <sql>
             insert into bank_partner(name, partner_category, account_id)
-            values ('Кинотеатр',
+            values ('Кинотеатр "Искусство"',
             'ENTERTAINMENT',
             (select a.id from account a where a.account_number = '810123458'))
         </sql>

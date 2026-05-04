@@ -4,6 +4,7 @@ import com.example.online_bank.security.filter.JwtRequestFilter;
 import com.example.online_bank.security.provider.JwtRequestProvider;
 import com.example.online_bank.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -32,9 +33,8 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
 
-    //    @Value("${app.cors.allowed-origins}")
-//    private String corsUrl;
-    private static final String url = "https://online-bank-hyper-revolution-computer-systems-8zcoa3c4f.vercel.app/";
+    @Value("${app.cors.allowed-origins}")
+    private String corsUrl;
 
     //    Реализация фильтра для настройки конечных точек протокола
     @Bean
@@ -96,7 +96,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    // @Profile("dirty-config")
     public CorsConfigurationSource dirtyCorsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
@@ -117,29 +116,6 @@ public class SecurityConfig {
         return source;
     }
 
-//    @Bean
-//    //@Profile("!dirty-config")
-//    public CorsConfigurationSource corsConfigurationSource() {
-//        CorsConfiguration configuration = new CorsConfiguration();
-//
-//        // Указываем разрешенные источники
-//        configuration.setAllowedOrigins(List.of(corsUrl));
-//
-//        // Разрешаем основные HTTP-методы
-//        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-//
-//        // Разрешаем заголовки (важно для JWT и Content-Type)
-//        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
-//
-//        // Если используешь куки или передаешь Authorization Header
-//        configuration.setAllowCredentials(true);
-//
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        // Применяем настройки ко всем путям
-//        source.registerCorsConfiguration("/**", configuration);
-//        return source;
-//    }
-
     @Bean
     DaoAuthenticationProvider authenticationProvider(PasswordEncoder passwordEncoder, UserService userService) {
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider(passwordEncoder);
@@ -153,10 +129,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager
-            (
-                    DaoAuthenticationProvider daoAuthenticationProvider,
-                    JwtRequestProvider jwtRequestProvider) {
+    public AuthenticationManager authenticationManager(
+            DaoAuthenticationProvider daoAuthenticationProvider,
+            JwtRequestProvider jwtRequestProvider) {
         return new ProviderManager(Arrays.asList(daoAuthenticationProvider, jwtRequestProvider));
     }
 }

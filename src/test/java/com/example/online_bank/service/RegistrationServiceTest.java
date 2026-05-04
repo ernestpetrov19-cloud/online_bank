@@ -2,8 +2,6 @@ package com.example.online_bank.service;
 
 import com.example.online_bank.domain.dto.RegistrationDtoRequest;
 import com.example.online_bank.domain.event.SendVerificationCodeEvent;
-import com.example.online_bank.enums.BodyMessage;
-import com.example.online_bank.enums.SubjectMessage;
 import com.example.online_bank.exception.EntityAlreadyExistsException;
 import com.example.online_bank.mapper.UserMapper;
 import com.example.online_bank.repository.UserRepository;
@@ -20,6 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import static com.example.online_bank.enums.BodyMessage.VERIFICATION_BODY;
+import static com.example.online_bank.enums.SubjectMessage.VERIFICATION;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -57,7 +57,12 @@ class RegistrationServiceTest {
                 "myemail@test.com"
         );
 
-        SendVerificationCodeEvent mockEvent = new SendVerificationCodeEvent("myemail@test.com", "1234", SubjectMessage.VERIFICATION, BodyMessage.VERIFICATION_BODY);
+        SendVerificationCodeEvent mockEvent = new SendVerificationCodeEvent(
+                "myemail@test.com",
+                "1234",
+                VERIFICATION.getValue(),
+                VERIFICATION_BODY.getValue()
+        );
 
         when(registrationProcessor.register(Mockito.eq(request), any(TriFunction.class)))
                 .thenReturn(mockEvent);

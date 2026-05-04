@@ -41,13 +41,19 @@ public class RegistrationProcessor {
         User user = mapper.apply(registrationDtoRequest, roleService, bCryptPasswordEncoder);
         userService.save(user);
 
-        VerificationCode verificationCode = verificationCodeService.create(user, EMAIL_VERIFICATION);
+        VerificationCode verificationCode = verificationCodeService.create(
+                user,
+                EMAIL_VERIFICATION,
+                VERIFICATION,
+                VERIFICATION_BODY,
+                false
+        );
 
         log.trace("Завершение регистрации");
         return new SendVerificationCodeEvent(
                 user.getEmail(),
                 verificationCode.getVerificationCode(),
-                VERIFICATION,
-                VERIFICATION_BODY);
+                VERIFICATION.getValue(),
+                VERIFICATION_BODY.getValue());
     }
 }

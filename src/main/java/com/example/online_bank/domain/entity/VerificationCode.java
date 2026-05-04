@@ -37,6 +37,12 @@ public class VerificationCode {
     @Enumerated(STRING)
     private CodeType codeType;
 
+    @Column
+    private String subjectMessage;
+
+    @Column
+    private String bodyMessage;
+
     @ManyToOne()
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;

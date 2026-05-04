@@ -5,10 +5,12 @@ import com.example.online_bank.domain.entity.User;
 import com.example.online_bank.exception.DeviceChallengesNotFoundException;
 import com.example.online_bank.repository.DeviceChallengesRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DeviceChallengeService {
     private final DeviceChallengesRepository deviceChallengesRepository;
 
@@ -31,6 +33,7 @@ public class DeviceChallengeService {
         );
 
         if (!isExists) {
+            log.error("Не удалось найти deviceChallenge");
             throw new DeviceChallengesNotFoundException();
         }
     }

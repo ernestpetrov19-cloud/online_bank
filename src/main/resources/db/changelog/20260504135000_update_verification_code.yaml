@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260504135000_update_verification_code
+      author: gilmanovamir
+      changes:
+        - addColumn:
+            tableName: verification_code
+            columns:
+              - column:
+                  name: subject_message
+                  type: varchar(100)
+              - column:
+                  name: body_message
+                  type: varchar(100)

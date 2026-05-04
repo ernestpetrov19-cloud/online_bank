@@ -68,4 +68,6 @@ public interface VerificationCodeRepository extends JpaRepository<VerificationCo
             @Param("newVerificationCode") String newVerificationCode,
             @Param("newExpDate") LocalDateTime newExpDate
     );
+
+    Optional<VerificationCode> findByUser_Email(String email);
 }

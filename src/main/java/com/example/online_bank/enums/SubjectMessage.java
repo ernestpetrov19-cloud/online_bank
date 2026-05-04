@@ -7,7 +7,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum SubjectMessage {
     VERIFICATION("Подтверждение регистрации"),
-    AUTHENTICATION("Подтверждение входа"),
-    RESEND("Повторная отправка кода");
+    AUTHENTICATION("Подтверждение входа");
     private final String value;
 }

@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class PayService {
+public class PayBankPartnerService {
     private final BankService bankService;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final BankPartnerService bankPartnerService;

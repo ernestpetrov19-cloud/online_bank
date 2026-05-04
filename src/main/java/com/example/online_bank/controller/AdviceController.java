@@ -136,4 +136,9 @@ public class AdviceController {
     public ResponseEntity<String> handleReuseDetectionException(Exception e) {
         return ResponseEntity.status(BAD_REQUEST).body(e.getMessage());
     }
+
+    @ExceptionHandler(DeviceChallengesNotFoundException.class )
+    public ResponseEntity<String> handleDeviceChallengesNotFoundException(DeviceChallengesNotFoundException e){
+        return new ResponseEntity<>(e.getMessage(), FORBIDDEN);
+    }
 }

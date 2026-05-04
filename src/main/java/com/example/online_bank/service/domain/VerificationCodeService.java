@@ -2,10 +2,12 @@ package com.example.online_bank.service.domain;
 
 import com.example.online_bank.domain.entity.User;
 import com.example.online_bank.domain.entity.VerificationCode;
-import com.example.online_bank.domain.event.SendVerificationCodeEvent;
+import com.example.online_bank.enums.BodyMessage;
 import com.example.online_bank.enums.CodeType;
+import com.example.online_bank.enums.SubjectMessage;
 import com.example.online_bank.exception.VerificationOtpException;
 import com.example.online_bank.repository.VerificationCodeRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,11 +15,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.example.online_bank.enums.BodyMessage.VERIFICATION_BODY;
-import static com.example.online_bank.enums.SubjectMessage.VERIFICATION;
 import static com.example.online_bank.enums.VerifiedCodeProperty.EXP_DATE;
 import static com.example.online_bank.util.CodeGeneratorUtil.generateVerificationCode;
-import static java.lang.Boolean.FALSE;
 import static java.util.UUID.randomUUID;
 
 @Slf4j
@@ -26,7 +25,7 @@ import static java.util.UUID.randomUUID;
 public class VerificationCodeService {
     private final VerificationCodeRepository verificationCodeRepository;
 
-    public VerificationCode create(User user, CodeType type) {
+    public VerificationCode create(User user, CodeType type, SubjectMessage subjectMessage, BodyMessage bodyMessage, boolean isVerified) {
         String verificationCode = generateVerificationCode();
 
         LocalDateTime now = LocalDateTime.now();
@@ -38,8 +37,10 @@ public class VerificationCodeService {
                 .verificationCode(verificationCode)
                 .createdAt(LocalDateTime.now())
                 .user(user)
-                .isVerified(FALSE)
+                .isVerified(isVerified)
                 .codeType(type)
+                .subjectMessage(subjectMessage.getValue())
+                .bodyMessage(bodyMessage.getValue())
                 .build();
 
         verificationCodeRepository.save(verificationCodeEntity);
@@ -55,7 +56,7 @@ public class VerificationCodeService {
         return LocalDateTime.now().plusSeconds(seconds);
     }
 
-    public void cleanAllUserVerifiedCodes(Long userId) {
+    public void deleteAllUserVerificationCodes(Long userId) {
         verificationCodeRepository.deleteAllByIsVerifiedTrueAndUser_id(userId);
     }
 
@@ -81,15 +82,20 @@ public class VerificationCodeService {
                         new VerificationOtpException("Ошибка верификации. Запросите новый код."));
     }
 
-    public SendVerificationCodeEvent updateVerifiedCode(String email) {
+    public String updateVerificationCode(String email) {
         String newVerificationCode = generateVerificationCode();
         LocalDateTime newExpirationDate = createExpirationDate(EXP_DATE.getSeconds());
         verificationCodeRepository.updateVerifiedCodeByUser_Email(email, newVerificationCode, newExpirationDate);
-        return new SendVerificationCodeEvent(email, newVerificationCode, VERIFICATION, VERIFICATION_BODY);
+        return newVerificationCode;
     }
 
     public void verifyCode(VerificationCode verificationCode) {
         verificationCode.setIsVerified(true);
         verificationCodeRepository.save(verificationCode);
+    }
+
+    public VerificationCode findCodeByUserEmail(String email) {
+        return verificationCodeRepository.findByUser_Email(email)
+                .orElseThrow(()-> new EntityNotFoundException("Пользователь с таким email не найден"));
     }
 }

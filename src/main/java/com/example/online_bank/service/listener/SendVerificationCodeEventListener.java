@@ -10,10 +10,10 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 @Component
 @Slf4j
-public class SendOtpEventListener {
+public class SendVerificationCodeEventListener {
     private final NotificationService notificationService;
 
-    public SendOtpEventListener(@Qualifier("defaultNotificationService") NotificationService notificationService) {
+    public SendVerificationCodeEventListener(@Qualifier("defaultNotificationService") NotificationService notificationService) {
         this.notificationService = notificationService;
     }
 
@@ -23,8 +23,8 @@ public class SendOtpEventListener {
         log.trace("Отправка сообщения на почту");
         notificationService.sendVerificationCode(
                 event.userEmail(),
-                event.subjectMessage().getValue(),
-                event.bodyMessage().getValue() + event.code()
+                event.subjectMessage(),
+                event.bodyMessage() + event.code()
         );
     }
 }

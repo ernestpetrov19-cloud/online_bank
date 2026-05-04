@@ -1,8 +1,10 @@
 package com.example.online_bank.service;
 
 import com.example.online_bank.domain.dto.BuyCurrencyDto;
+import com.example.online_bank.domain.dto.ConvertCurrencyResponseDto;
 import com.example.online_bank.domain.dto.FinanceOperationDto;
 import com.example.online_bank.domain.dto.OperationInfoDto;
+import com.example.online_bank.domain.entity.Account;
 import com.example.online_bank.domain.entity.Operation;
 import com.example.online_bank.mapper.OperationMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +32,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 @Slf4j
 class BankServiceTest {
+    @InjectMocks
+    private BankService bankService;
     @Mock
     private AccountService accountService;
     @Mock
@@ -37,21 +41,21 @@ class BankServiceTest {
     @Mock
     private OperationMapper operationMapper;
     @Mock
-    private ValidateCurrencyService validateCurrencyService;
-    @InjectMocks
-    private BankService bankService;
+    private CurrencyConversionService currencyConversionService;
 
     @Test
     void successMakePayment_RequestCurrencyMatchAccount() {
         //Подготовка данных
         FinanceOperationDto dtoRq = new FinanceOperationDto("001", TEN, "test", RUB);
+        Account accountMock = Account.builder().accountNumber("001").currencyCode(RUB).build();
         Operation operation = Operation.builder()
                 .id(1L)
                 .description(dtoRq.description())
                 .createdAt(LocalDateTime.now())
-                .amount(TEN)
-                .currencyCode(RUB)
+                .amount(dtoRq.amount())
+                .currencyCode(dtoRq.selectedCurrencyCode())
                 .operationType(WITHDRAW)
+                .account(accountMock)
                 .build();
 
         OperationInfoDto operationResponseMock = new OperationInfoDto(
@@ -61,17 +65,18 @@ class BankServiceTest {
                 operation.getOperationType(),
                 operation.getAmount(),
                 operation.getDescription(),
-                RUB
-
+                operation.getCurrencyCode()
         );
 
+        ConvertCurrencyResponseDto convertResponse = new ConvertCurrencyResponseDto(RUB, RUB, TEN, TEN);
+
         when(accountService.findCurrencyCode("001")).thenReturn((RUB));
-        when(validateCurrencyService.processTransaction(
-                eq(RUB),
-                eq(RUB),
-                any(),
-                eq("001"),
-                eq(dtoRq.amount()))).thenReturn(TEN);
+
+        when(currencyConversionService.convert(
+                dtoRq.selectedCurrencyCode(),
+                dtoRq.selectedCurrencyCode(),
+                dtoRq.amount()
+        )).thenReturn(convertResponse);
 
         when(operationService.createOperation
                 (any(LocalDateTime.class),
@@ -82,24 +87,27 @@ class BankServiceTest {
                         eq(RUB)
                 )).thenReturn(operation);
         when(operationMapper.toOperationInfoDto(any(Operation.class))).thenReturn(operationResponseMock);
-        OperationInfoDto operationInfoDto = bankService.makePayment(dtoRq);
+        OperationInfoDto result = bankService.makePayment(dtoRq);
 
-        log.info("operationInfoDto - {}", operationInfoDto);
-        assertNotNull(operationInfoDto);
-        assertEquals(dtoRq.accountNumber(), operationInfoDto.accountNumber());
+        assertNotNull(result);
+        assertEquals(dtoRq.accountNumber(), result.accountNumber());
+        assertEquals(TEN, result.amount());
+        assertEquals(RUB, result.currencyCode());
     }
 
     @Test
     void successMakeDeposit() {
         //Подготовка данных
         FinanceOperationDto dtoRq = new FinanceOperationDto("001", TEN, "test", RUB);
+        Account accountMock = Account.builder().accountNumber("001").currencyCode(RUB).build();
         Operation operation = Operation.builder()
                 .id(1L)
                 .description(dtoRq.description())
                 .createdAt(LocalDateTime.now())
-                .amount(TEN)
-                .currencyCode(RUB)
+                .amount(dtoRq.amount())
+                .currencyCode(dtoRq.selectedCurrencyCode())
                 .operationType(DEPOSIT)
+                .account(accountMock)
                 .build();
 
         OperationInfoDto operationResponseMock = new OperationInfoDto(
@@ -111,15 +119,14 @@ class BankServiceTest {
                 operation.getDescription(),
                 RUB
         );
+        ConvertCurrencyResponseDto convertResponse = new ConvertCurrencyResponseDto(RUB, RUB, TEN, TEN);
 
         when(accountService.findCurrencyCode("001")).thenReturn((RUB));
-        when(validateCurrencyService.processTransaction(
-                eq(RUB),
-                eq(RUB),
-                any(),
-                eq("001"),
-                eq(dtoRq.amount())
-        )).thenReturn(TEN);
+        when(currencyConversionService.convert(
+                dtoRq.selectedCurrencyCode(),
+                dtoRq.selectedCurrencyCode(),
+                dtoRq.amount()
+        )).thenReturn(convertResponse);
 
         when(operationService.createOperation(
                 any(LocalDateTime.class),
@@ -130,9 +137,11 @@ class BankServiceTest {
                 eq(RUB)
         )).thenReturn(operation);
         when(operationMapper.toOperationInfoDto(any(Operation.class))).thenReturn(operationResponseMock);
-        OperationInfoDto operationInfoDto = bankService.makeDeposit(dtoRq);
-        assertNotNull(operationInfoDto);
-        assertEquals(dtoRq.accountNumber(), operationInfoDto.accountNumber());
+        OperationInfoDto result = bankService.makeDeposit(dtoRq);
+        assertNotNull(result);
+        assertEquals(dtoRq.accountNumber(), result.accountNumber());
+        assertEquals(TEN, result.amount());
+        assertEquals(RUB, result.currencyCode());
     }
 
     @Test
@@ -153,10 +162,9 @@ class BankServiceTest {
                 now,
                 dto.baseAccountNumber(),
                 WITHDRAW,
-               dto.amount(),
+                dto.amount(),
                 paymentDescription,
                 CNY);
-
 
         when(bankService.makePayment(new FinanceOperationDto(dto.baseAccountNumber(), dto.amount(), paymentDescription, CNY))).thenReturn(paymentOperationDto);
 

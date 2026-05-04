@@ -23,7 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.example.online_bank.enums.BodyMessage.VERIFICATION_BODY;
 import static com.example.online_bank.enums.CodeType.EMAIL_VERIFICATION;
+import static com.example.online_bank.enums.SubjectMessage.VERIFICATION;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -47,7 +49,7 @@ class VerificationCodeServiceTestIT {
 
     @Test
     @Transactional
-    @DisplayName("Успешное создание otp кода")
+    @DisplayName("Успешное создание верификационного кода")
     void successCreateVerifiedCode() {
         //подготовка данных arr
         User userMock = User.builder().build();
@@ -55,7 +57,11 @@ class VerificationCodeServiceTestIT {
 
         VerificationCode verificationCode = verificationCodeService.create(
                 userMock,
-                EMAIL_VERIFICATION);
+                EMAIL_VERIFICATION,
+                VERIFICATION,
+                VERIFICATION_BODY,
+                false
+        );
 
         //act
         assertDoesNotThrow(() -> verificationCodeRepository.findVerifiedCodeByVerificationCode(verificationCode.getVerificationCode())
@@ -87,9 +93,13 @@ class VerificationCodeServiceTestIT {
         LocalDateTime now = LocalDateTime.now();
         verificationCodeService.create(
                 userMock,
-                EMAIL_VERIFICATION);
+                EMAIL_VERIFICATION,
+                VERIFICATION,
+                VERIFICATION_BODY,
+                false
+        );
 
-        verificationCodeService.cleanAllUserVerifiedCodes(userMock.getId());
+        verificationCodeService.deleteAllUserVerificationCodes(userMock.getId());
         //act
         assertTrue(verificationCodeRepository.findAllByExpiresAtBeforeAndUser_Id(now, userMock.getId()).isEmpty());
     }
@@ -104,11 +114,13 @@ class VerificationCodeServiceTestIT {
                 .build();
         userService.save(userMock);
 
-        verificationCodeService.create(userMock, EMAIL_VERIFICATION);
+        verificationCodeService.create(userMock, EMAIL_VERIFICATION, VERIFICATION, VERIFICATION_BODY, false);
 
         //act
-        VerificationCode verificationCode = assertDoesNotThrow(() -> verificationCodeRepository.findVerifiedCodeByVerificationCode("7777")
-                .orElseThrow(EntityNotFoundException::new));
+        VerificationCode verificationCode = assertDoesNotThrow(() -> {
+            return verificationCodeRepository.findVerifiedCodeByVerificationCode("7777")
+                    .orElseThrow(EntityNotFoundException::new);
+        });
         log.debug(verificationCode.toString());
         assertTrue(verificationCode.getIsVerified());
     }

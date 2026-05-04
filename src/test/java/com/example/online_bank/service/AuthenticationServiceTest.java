@@ -3,7 +3,6 @@ package com.example.online_bank.service;
 import com.example.online_bank.domain.dto.*;
 import com.example.online_bank.domain.entity.*;
 import com.example.online_bank.domain.event.RelatableUserToQuestEvent;
-import com.example.online_bank.domain.event.SendVerificationCodeEvent;
 import com.example.online_bank.enums.CodeType;
 import com.example.online_bank.enums.Roles;
 import com.example.online_bank.enums.TokenStatus;
@@ -30,10 +29,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.example.online_bank.enums.AuthenticationResponseKey.*;
-import static com.example.online_bank.enums.BodyMessage.CONFIRM_LOGIN;
 import static com.example.online_bank.enums.CodeType.EMAIL_VERIFICATION;
 import static com.example.online_bank.enums.SecurityMessage.HACKING_ATTEMPT_DETECTED;
-import static com.example.online_bank.enums.SubjectMessage.AUTHENTICATION;
 import static com.example.online_bank.enums.TestUserData.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -68,6 +65,8 @@ class AuthenticationServiceTest {
     private DeviceChallengeService deviceChallengeService;
     @Mock
     private AuthenticationManager authenticationManager;
+    @Mock
+    private DeviceFlowService deviceFlowService;
 
     private static VerificationRequestDto verificationRequestDto;
 
@@ -285,7 +284,6 @@ class AuthenticationServiceTest {
                 .codeType(CodeType.EMAIL_AUTHENTICATION)
                 .build();
         log.info("verificationCodeMock - {}", verificationCodeMock);
-        var sendVerificationCodeEventMock = new SendVerificationCodeEvent(EMAIL.getValue(), VERIFICATION_CODE.getValue(), AUTHENTICATION, CONFIRM_LOGIN);
 
         when(authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginRequestDto.email(),
@@ -298,12 +296,11 @@ class AuthenticationServiceTest {
                 eq(userMock)
         )).thenReturn(Optional.empty());
 
-        when(verificationCodeService.create(any(), any())).thenReturn(verificationCodeMock);
-        doNothing().when(applicationEventPublisher).publishEvent(sendVerificationCodeEventMock);
+        doNothing().when(deviceFlowService).handleNewUserDevice(loginRequestDto, userMock);
 
         assertThrows(DeviceNotFoundException.class, () -> authenticationService.login(loginRequestDto));
-        verify(deviceChallengeService).create(any(), anyString(), anyString(), anyString());
-        verify(applicationEventPublisher).publishEvent(any(SendVerificationCodeEvent.class));
+
+        verify(deviceFlowService).handleNewUserDevice(loginRequestDto, userMock);
         verify(userAgentService, never()).checkUserAgent(anyString(), anyString());
         verify(userAgentService, never()).checkBrowserVersion(anyString(), anyString());
         verify(trustedDeviceService, never()).updateUserAgent(any(), any());
@@ -323,9 +320,7 @@ class AuthenticationServiceTest {
                 .build();
         refreshTokenMock.setFamily(tokenFamilyMock);
 
-        User userMock = User.builder()
-                .tokenFamilies(List.of(tokenFamilyMock))
-                .build();
+
         var silentLoginRequestDto = new SilentLoginRequestDto("token", UUID.randomUUID().toString());
         when(jwtService.getPayload(anyString())).thenReturn(claimsMock);
         when(jwtService.getUuid(eq(claimsMock))).thenReturn(oldTokenUuid);

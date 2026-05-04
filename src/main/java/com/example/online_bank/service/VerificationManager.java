@@ -7,7 +7,6 @@ import com.example.online_bank.domain.entity.VerificationCode;
 import com.example.online_bank.domain.event.SendVerificationCodeEvent;
 import com.example.online_bank.enums.CodeType;
 import com.example.online_bank.service.domain.VerificationCodeService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -28,16 +27,21 @@ public class VerificationManager {
         VerificationCode verificationCode = verificationCodeService.findCodeByUser(code, user, codeType);
         verificationCodeService.verifyCode(verificationCode);
         userService.verifyUser(user);
+        verificationCodeService.deleteAllUserVerificationCodes(user.getId());
         return new VerificationResponseDto(user);
     }
 
     @Transactional
-    public void regenerateOtp(RegenerateVerifiedCodeDto dto) {
-        if (!userService.existsByEmail(dto.email())) {
-            throw new EntityNotFoundException("Пользователь с таким email не найден");
-        }
+    public void regenerateVerificationCode(RegenerateVerifiedCodeDto dto) {
+        VerificationCode oldVerificationCode = verificationCodeService.findCodeByUserEmail(dto.email());
 
-        SendVerificationCodeEvent event = verificationCodeService.updateVerifiedCode(dto.email());
+        String newVerificationCode = verificationCodeService.updateVerificationCode(dto.email());
+        var event = new SendVerificationCodeEvent(
+                dto.email(),
+                newVerificationCode,
+                oldVerificationCode.getSubjectMessage(),
+                oldVerificationCode.getBodyMessage()
+        );
         applicationEventPublisher.publishEvent(event);
     }
 }

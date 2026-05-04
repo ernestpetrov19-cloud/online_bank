@@ -7,7 +7,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum BodyMessage {
     VERIFICATION_BODY("Ваш код подтверждения регистрации: "),
-    RESEND_BODY("Повторная отправка кода: "),
     CONFIRM_LOGIN("Подтвердите вход с нового устройства, введя проверочный код: ");
     private final String value;
 }

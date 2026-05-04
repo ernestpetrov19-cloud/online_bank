@@ -9,7 +9,6 @@ import com.example.online_bank.domain.event.SendVerificationCodeEvent;
 import com.example.online_bank.service.domain.VerificationCodeService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,10 +19,9 @@ import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.LocalDateTime;
 
-import static com.example.online_bank.enums.BodyMessage.RESEND_BODY;
+import static com.example.online_bank.enums.BodyMessage.VERIFICATION_BODY;
 import static com.example.online_bank.enums.CodeType.EMAIL_VERIFICATION;
-import static com.example.online_bank.enums.SubjectMessage.RESEND;
-import static com.example.online_bank.enums.TestUserData.VERIFICATION_CODE;
+import static com.example.online_bank.enums.SubjectMessage.VERIFICATION;
 import static java.time.LocalDateTime.of;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
@@ -41,15 +39,12 @@ class VerificationManagerTest {
     private UserService userService;
 
     private static final String OTP = "1234";
-    public static final String RESEND_CODE_MESSAGE = "Повторная отправка кода";
-
     private final User userMock = User.builder()
             .id(1L)
             .email("test@gmail.com")
             .phoneNumber("79999999999")
             .isVerified(false)
             .build();
-
     private final LocalDateTime createdAt = of(
             2026,
             4,
@@ -84,9 +79,9 @@ class VerificationManagerTest {
     @Test
     @SneakyThrows
     void successVerifyUserByEmail() {
+        when(userService.findByEmail(userMock.getEmail())).thenReturn(userMock);
         when(verificationCodeService.findCodeByUser(OTP, userMock, EMAIL_VERIFICATION))
                 .thenReturn(verificationCodeMock);
-        when(userService.findByEmail(userMock.getEmail())).thenReturn(userMock);
 
         VerificationResponseDto verificationResponseDto = verificationManager.verifyUserByEmail(
                 verificationRequestDto.verificationCode(),
@@ -96,6 +91,7 @@ class VerificationManagerTest {
         assertNotNull(verificationResponseDto);
         assertEquals("test@gmail.com", verificationResponseDto.verifiedUser().getEmail());
         verify(verificationCodeService).findCodeByUser(eq(OTP), eq(userMock), eq(EMAIL_VERIFICATION));
+        verify(verificationCodeService).deleteAllUserVerificationCodes(anyLong());
     }
 
     @Test
@@ -104,27 +100,49 @@ class VerificationManagerTest {
         when(userService.findByEmail(userMock.getEmail())).thenThrow(EntityNotFoundException.class);
         assertThrows(
                 EntityNotFoundException.class,
-                () -> verificationManager.verifyUserByEmail(verificationRequestDto.verificationCode(), userMock.getEmail(), EMAIL_VERIFICATION));
+                () -> verificationManager.verifyUserByEmail(
+                        verificationRequestDto.verificationCode(),
+                        userMock.getEmail(),
+                        EMAIL_VERIFICATION)
+        );
 
-        Mockito.verifyNoMoreInteractions(verificationCodeService);
+        Mockito.verifyNoMoreInteractions(verificationCodeService, applicationEventPublisher);
     }
 
     @Test
-    void successRegenerateOtp() {
-        when(userService.existsByEmail(regenerateVerifiedCodeDto.email())).thenReturn(true);
-        var event = new SendVerificationCodeEvent(regenerateVerifiedCodeDto.email(), VERIFICATION_CODE.getValue(), RESEND, RESEND_BODY);
-        when(verificationCodeService.updateVerifiedCode(regenerateVerifiedCodeDto.email())).thenReturn(event);
-        doNothing().when(applicationEventPublisher).publishEvent(event);
-        Assertions.assertDoesNotThrow(() -> verificationManager.regenerateOtp(regenerateVerifiedCodeDto));
-        verify(verificationCodeService).updateVerifiedCode(regenerateVerifiedCodeDto.email());
+    void successRegenerateVerificationCode() {
+        VerificationCode oldVerificationCode = VerificationCode.builder()
+                .bodyMessage(VERIFICATION_BODY.getValue())
+                .subjectMessage(VERIFICATION.getValue())
+                .codeType(EMAIL_VERIFICATION)
+                .isVerified(false)
+                .verificationCode("1234")
+                .build();
+
+        String newVerificationCode = "0123";
+        when(verificationCodeService.findCodeByUserEmail(regenerateVerifiedCodeDto.email()))
+                .thenReturn(oldVerificationCode);
+        var event = new SendVerificationCodeEvent(
+                regenerateVerifiedCodeDto.email(),
+                newVerificationCode,
+                VERIFICATION.getValue(),
+                VERIFICATION_BODY.getValue()
+        );
+        when(verificationCodeService.updateVerificationCode(eq(regenerateVerifiedCodeDto.email())))
+                .thenReturn(newVerificationCode);
+        doNothing().when(applicationEventPublisher).publishEvent(eq(event));
+        verificationManager.regenerateVerificationCode(regenerateVerifiedCodeDto);
+        verify(verificationCodeService).updateVerificationCode(regenerateVerifiedCodeDto.email());
         verify(applicationEventPublisher).publishEvent(event);
     }
 
     @Test
-    void failureRegenerateOtp() {
-        when(userService.existsByEmail(regenerateVerifiedCodeDto.email())).thenReturn(false);
-        assertThrows(EntityNotFoundException.class, () -> verificationManager.regenerateOtp(regenerateVerifiedCodeDto));
+    void failureRegenerateVerificationCode() {
+        when(verificationCodeService.findCodeByUserEmail(regenerateVerifiedCodeDto.email()))
+                .thenThrow(EntityNotFoundException.class);
+        assertThrows(EntityNotFoundException.class,
+                () -> verificationManager.regenerateVerificationCode(regenerateVerifiedCodeDto));
 
-        Mockito.verifyNoInteractions(applicationEventPublisher, verificationCodeService);
+        Mockito.verifyNoInteractions(applicationEventPublisher);
     }
 }

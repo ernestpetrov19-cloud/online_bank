@@ -64,6 +64,8 @@ databaseChangeLog:
   - include:
       file: db/changelog/20260219150300_seeding_exchange_rate.xml
   - include:
+      file: db/changelog/20260219150305_seeding_accounts.xml
+  - include:
       file: db/changelog/20260219150310_seeding_bank_partner.xml
   - include:
       file: db/changelog/20260219150320_seeding_quest.xml
@@ -83,3 +85,5 @@ databaseChangeLog:
       file: db/changelog/20260502210300_add_column_bonus_account.yaml
   - include:
       file: db/changelog/20260503121800_update_table_verification_code.yaml
+  - include:
+      file: db/changelog/20260504135000_update_verification_code.yaml

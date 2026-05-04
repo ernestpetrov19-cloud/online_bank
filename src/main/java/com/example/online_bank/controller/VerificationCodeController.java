@@ -23,7 +23,7 @@ public class VerificationCodeController {
 
     @PatchMapping("/update")
     public ResponseEntity<Void> regenerateCode(@RequestBody RegenerateVerifiedCodeDto dto) {
-        verificationManager.regenerateOtp(dto);
+        verificationManager.regenerateVerificationCode(dto);
         return ResponseEntity.ok().build();
     }
 }

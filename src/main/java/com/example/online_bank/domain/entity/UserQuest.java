@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import static jakarta.persistence.FetchType.EAGER;
-import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
 /**
@@ -24,7 +23,7 @@ public class UserQuest {
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = LAZY)
+    @ManyToOne(fetch = EAGER)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
@@ -34,7 +33,4 @@ public class UserQuest {
 
     @Column()
     private Boolean isComplete;
-
-    @Column()
-    private Integer userProgress;
 }

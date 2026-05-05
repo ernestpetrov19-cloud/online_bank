@@ -13,14 +13,12 @@ import java.util.UUID;
 
 @Repository
 public interface UserCategoryStatsRepository extends JpaRepository<UserCategoryStats, Long> {
-    Optional<UserCategoryStats> findByUserAndCategoryAndSpendPeriodBetween(
-            User user,
+    Optional<UserCategoryStats> findByUser_UuidAndCategoryAndLastSpendDateBetween(
+            UUID userUuid,
             PartnerCategory category,
             LocalDate start,
             LocalDate end
     );
-
-    Optional<UserCategoryStats> findByUser_Uuid(UUID userUuid);
 
     List<UserCategoryStats> findAllByUser(User user);
 }

@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260505153900_rename_column_user_category_stats.yaml
+      author: gilmanovamir
+      changes:
+        - renameColumn:
+            tableName: user_category_stats
+            oldColumnName: spend_date
+            newColumnName: last_spend_date

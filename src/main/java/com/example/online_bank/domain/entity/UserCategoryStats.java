@@ -28,13 +28,13 @@ public class UserCategoryStats {
     private PartnerCategory category;
 
     @Column
-    private BigDecimal totalSpend;
+    private BigDecimal totalSpend; //в рублях
 
     @Column
     private Integer countSpendInMonth;
 
     @Column
-    private LocalDate spendPeriod;
+    private LocalDate lastSpendDate;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")

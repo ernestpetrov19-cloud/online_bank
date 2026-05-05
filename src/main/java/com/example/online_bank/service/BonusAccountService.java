@@ -10,6 +10,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -23,6 +24,8 @@ import static com.example.online_bank.enums.CurrencyCode.RUB;
 public class BonusAccountService {
     public static final String DESCRIPTION = "Пополнение бонусов";
     private static final String ERR_MSG = "Не хватает бонусов для выполнения операции.";
+    public static final double CONVERT_COEFFICIENT = 0.5;
+
     private final BonusAccountRepository bonusAccountRepository;
     private final BankService bankService;
 
@@ -34,7 +37,7 @@ public class BonusAccountService {
                 .toList();
     }
 
-    public BonusAccount getBonusAccountByAccountNumber(String accountNumber) {
+    public BonusAccount findBonusAccountByAccountNumber(String accountNumber) {
         return bonusAccountRepository.findByAccount_AccountNumber(accountNumber)
                 .orElseThrow(EntityNotFoundException::new);
     }
@@ -45,24 +48,33 @@ public class BonusAccountService {
         );
 
         if (amount.compareTo(bonusAccount.getPoints()) > 0) {
+            log.warn("Не хватает бонусов для снятия");
             throw new ConvertBonusException(ERR_MSG);
         }
 
-        BigDecimal convertResult = amount.multiply(BigDecimal.valueOf(0.5));
+        BigDecimal convertResult = amount.multiply(BigDecimal.valueOf(CONVERT_COEFFICIENT));
         FinanceOperationDto operationDto = new FinanceOperationDto(
                 accountNumber,
                 convertResult,
                 DESCRIPTION,
                 RUB
         );
+        withdrawBonus(accountNumber, bonusAccount.getPoints());
         return bankService.makeDeposit(operationDto);
     }
 
-    public void depositBonus(String accountNumber, Integer points) {
-        BonusAccount bonusAccount = getBonusAccountByAccountNumber(accountNumber);
-        bonusAccount.setPoints(BigDecimal.valueOf(points));
+    @Transactional
+    public void depositBonus(String accountNumber, BigDecimal points) {
+        BonusAccount bonusAccount = findBonusAccountByAccountNumber(accountNumber);
+        bonusAccount.setPoints(bonusAccount.getPoints().add(points));
 
         bonusAccountRepository.save(bonusAccount);
-        log.info("deposit bonus account: {}", bonusAccount);
+    }
+
+    private void withdrawBonus(String accountNumber, BigDecimal points){
+        BonusAccount bonusAccount = findBonusAccountByAccountNumber(accountNumber);
+        bonusAccount.setPoints(bonusAccount.getPoints().subtract(points));
+
+        bonusAccountRepository.save(bonusAccount);
     }
 }

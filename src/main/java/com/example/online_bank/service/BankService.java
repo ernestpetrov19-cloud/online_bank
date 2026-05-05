@@ -1,6 +1,5 @@
 package com.example.online_bank.service;
 
-import com.example.online_bank.domain.dto.BuyCurrencyDto;
 import com.example.online_bank.domain.dto.ConvertCurrencyResponseDto;
 import com.example.online_bank.domain.dto.FinanceOperationDto;
 import com.example.online_bank.domain.dto.OperationInfoDto;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static com.example.online_bank.enums.OperationType.DEPOSIT;
 import static com.example.online_bank.enums.OperationType.WITHDRAW;
@@ -85,40 +83,5 @@ public class BankService {
                 dto.accountNumber(),
                 dto.selectedCurrencyCode())
         );
-    }
-
-    /**
-     * Покупка валюты. Производит списание суммы со счета {@code dto.baseTargetAccount},
-     * делает конвертацию в валюту {@code dto.targetAccountNumber}
-     */
-    @Transactional()
-    public List<OperationInfoDto> buyCurrency(BuyCurrencyDto dto) {
-        CurrencyCode targetCurrencyCode = accountService.findCurrencyCode(dto.targetAccountNumber());
-
-        List<String> descriptions = createDescriptions(dto);
-
-        final String paymentDescription = descriptions.getFirst();
-        final String depositDescription = descriptions.getLast();
-
-        OperationInfoDto paymentOperation = makePayment(
-                new FinanceOperationDto(dto.baseAccountNumber(),
-                        dto.amount(),
-                        paymentDescription,
-                        targetCurrencyCode)
-        );
-
-        OperationInfoDto depositOperation = makeDeposit(new FinanceOperationDto(
-                dto.targetAccountNumber(),
-                dto.amount(),
-                depositDescription,
-                targetCurrencyCode
-        ));
-        return List.of(paymentOperation, depositOperation);
-    }
-
-    private List<String> createDescriptions(BuyCurrencyDto dto) {
-        String baseAccountPostfix = "валюты со счета %s".formatted(dto.baseAccountNumber());
-        String targetAccountPostfix = "валюты со счета %s".formatted(dto.targetAccountNumber());
-        return List.of("Продажа %s".formatted(baseAccountPostfix), "Покупка %s".formatted(targetAccountPostfix));
     }
 }

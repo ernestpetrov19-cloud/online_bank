@@ -4,6 +4,8 @@ import com.example.online_bank.enums.PartnerCategory;
 import jakarta.persistence.*;
 import lombok.*;
 
+import static jakarta.persistence.GenerationType.IDENTITY;
+
 @Entity
 @Table
 @Getter
@@ -14,7 +16,7 @@ import lombok.*;
 @ToString
 public class BankPartner {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = IDENTITY)
     private Long id;
     @Column
     private String name;

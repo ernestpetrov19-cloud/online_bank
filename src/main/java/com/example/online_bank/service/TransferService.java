@@ -45,7 +45,7 @@ public class TransferService {
      *                    Делает списание со счета отправителя и начисление на счет получателя.
      */
     @Transactional
-    public OperationInfoDto transferMoney(
+    public OperationInfoDto transferMoneyByDifferentPort(
             TransferDto transferDto) {
         CurrencyCode recipientCurrencyCode = accountService.findCurrencyCode(transferDto.recipientInfo().accountNumberTo());
 

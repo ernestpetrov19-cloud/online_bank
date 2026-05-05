@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260505170700_change_column_type_quest.yaml
+      author: gilmanovamir
+      changes:
+        - modifyDataType:
+            tableName: quest
+            columnName: point_reward
+            newDataType: numeric(9,2)

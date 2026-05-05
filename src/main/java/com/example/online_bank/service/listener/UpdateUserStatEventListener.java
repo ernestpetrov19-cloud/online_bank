@@ -21,15 +21,19 @@ public class UpdateUserStatEventListener {
     @Async
     @EventListener
     public void updateUserStat(UpdateUserStatEvent event) {
+        log.info("Обновление статистики");
+        //1. Обновление статистики пользователя
         UserCategoryStats userCategoryStats = userCategoryStatsService.updateUserStat(event);
+
+        //2. Отправка события для обновления таблицы user_quest
         UpdateUserQuestEvent updateUserQuestEvent = new UpdateUserQuestEvent(
-                userCategoryStats.getCountSpendInMonth(),
                 userCategoryStats.getCategory(),
                 userCategoryStats.getUser(),
-                userCategoryStats.getSpendPeriod(),
-                event.userAccount()
+                userCategoryStats.getLastSpendDate(),
+                event.userAccount(),
+                event.spendAmount()
         );
-        applicationEventPublisher.publishEvent(updateUserQuestEvent);
         log.info("Отправляю ивент UserQuest");
+        applicationEventPublisher.publishEvent(updateUserQuestEvent);
     }
 }

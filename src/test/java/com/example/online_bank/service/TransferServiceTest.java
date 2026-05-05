@@ -61,14 +61,14 @@ class TransferServiceTest {
             );
 
     @Test
-    void successTransferMoney_CurrencyCodeEquals() {
+    void successTransferMoney_ByDifferentPort_CurrencyCodeEquals() {
         when(bank.getPrefixUrl()).thenReturn("testUrl");
         when(accountService.findCurrencyCode(Mockito.anyString())).thenReturn(RUB);
         when(bankService.makePayment(any(FinanceOperationDto.class))).thenReturn(mockBankResponse);
         when(restTemplate.exchange(any(RequestEntity.class), eq(OperationInfoDto.class)))
                 .thenReturn(new ResponseEntity<>(mockBankResponse, HttpStatus.CREATED));
 
-        OperationInfoDto result = transferService.transferMoney(transferDto);
+        OperationInfoDto result = transferService.transferMoneyByDifferentPort(transferDto);
         assertEquals(mockBankResponse, result);
         assertEquals(mockBankResponse.currencyCode(), result.currencyCode());
         verify(accountService, times(1)).findCurrencyCode(anyString());
@@ -78,14 +78,14 @@ class TransferServiceTest {
     }
 
     @Test
-    void successTransferMoney_CurrencyCodeDiff() {
+    void successTransferMoney_ByDifferentPort_CurrencyCodeDiff() {
         when(bank.getPrefixUrl()).thenReturn("testUrl");
         when(accountService.findCurrencyCode(Mockito.anyString())).thenReturn(USD);
         when(bankService.makePayment(any(FinanceOperationDto.class))).thenReturn(mockBankResponse);
         when(restTemplate.exchange(any(RequestEntity.class), eq(OperationInfoDto.class)))
                 .thenReturn(new ResponseEntity<>(mockBankResponse, HttpStatus.CREATED));
 
-        OperationInfoDto result = transferService.transferMoney(transferDto);
+        OperationInfoDto result = transferService.transferMoneyByDifferentPort(transferDto);
         assertEquals(mockBankResponse, result);
         assertEquals(mockBankResponse.currencyCode(), result.currencyCode());
         verify(accountService, times(1)).findCurrencyCode(anyString());
@@ -95,14 +95,14 @@ class TransferServiceTest {
     }
 
     @Test
-    void failerTransferMoney() {
+    void failerTransferMoneyByDifferentPort() {
         when(bank.getPrefixUrl()).thenReturn("testUrl");
         when(accountService.findCurrencyCode(Mockito.anyString())).thenReturn(RUB);
         when(bankService.makePayment(any(FinanceOperationDto.class))).thenReturn(mockBankResponse);
         when(restTemplate.exchange(any(RequestEntity.class), eq(OperationInfoDto.class)))
                 .thenThrow(HttpClientErrorException.class);
 
-        Exception exception = Assertions.assertThrows(Exception.class, () -> transferService.transferMoney(transferDto));
+        Exception exception = Assertions.assertThrows(Exception.class, () -> transferService.transferMoneyByDifferentPort(transferDto));
         assertTrue(exception.getMessage().contains("Ошибка при отправке перевода"));
     }
 

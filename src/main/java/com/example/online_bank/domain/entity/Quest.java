@@ -4,6 +4,7 @@ import com.example.online_bank.enums.PartnerCategory;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,19 +23,18 @@ public class Quest {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
+
     @Enumerated(EnumType.STRING)
     private PartnerCategory category;
+
     @Column
     private LocalDate dateOfExpiry;
+
     @Column
-    private Integer pointReward;
+    private BigDecimal pointReward;
 
     @OneToMany(fetch = LAZY, mappedBy = "quest")
     @ToString.Exclude
     @Builder.Default
     private List<UserQuest> userQuest = new ArrayList<>();
-
-    @Column
-    private Integer progress;
-
 }

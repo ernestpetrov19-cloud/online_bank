@@ -87,3 +87,13 @@ databaseChangeLog:
       file: db/changelog/20260503121800_update_table_verification_code.yaml
   - include:
       file: db/changelog/20260504135000_update_verification_code.yaml
+  - include:
+      file: db/changelog/20260505152400_rename_column_user_category_stats.yaml
+  - include:
+      file: db/changelog/20260505153900_rename_column_user_category_stats.yaml
+  - include:
+      file: db/changelog/20260505165300_delete_column_from_quest.yaml
+  - include:
+      file: db/changelog/20260505170700_change_column_type_quest.yaml
+  - include:
+      file: db/changelog/20260505172400_delete_column_user_quest.yaml

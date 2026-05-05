@@ -30,14 +30,13 @@ public class UserQuestService {
     }
 
     @EventListener
-    public void makeRelationBetweenUserAndQuest(RelatableUserToQuestEvent event) {
-        List<Quest> allAvailable = questService.findAllAvalaible(LocalDate.now());
+    public void initializeQuestsForNewUser(RelatableUserToQuestEvent event) {
+        List<Quest> allAvailable = questService.findAllAvailable(LocalDate.now());
         List<UserQuest> userQuests = allAvailable.stream()
                 .map(quest -> UserQuest.builder()
                         .quest(quest)
                         .user(event.user())
                         .isComplete(false)
-                        .userProgress(0)
                         .build()
                 )
                 .toList();

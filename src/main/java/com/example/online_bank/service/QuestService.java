@@ -16,12 +16,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.math.BigDecimal.ZERO;
+import static java.math.RoundingMode.DOWN;
 import static java.util.stream.Collectors.toMap;
 
 @Service
@@ -36,13 +39,12 @@ public class QuestService {
     private final UserService userService;
 
     public Quest create(PartnerCategory category) {
-        int randomPoint = generateRandomPoint();
+        BigDecimal randomPoint = generateRandomPoint();
         LocalDate expDate = createExpDate();
         Quest quest = Quest.builder()
                 .pointReward(randomPoint)
                 .category(category)
                 .dateOfExpiry(expDate)
-                .progress(generateProgress())
                 .build();
         questRepository.save(quest);
         List<User> verifiedUsers = userRepository.findAllIsVerified();
@@ -52,7 +54,6 @@ public class QuestService {
                         UserQuest.builder()
                                 .isComplete(false)
                                 .user(user)
-                                .userProgress(0)
                                 .quest(quest)
                                 .build()
                 )
@@ -76,51 +77,57 @@ public class QuestService {
                 .toList();
     }
 
-    private int generateRandomPoint() {
-        return random.nextInt(1, 11) * 50;
-    }
-
-    private int generateProgress() {
-        return random.nextInt(2, 6);
-    }
-
     public List<UserQuestResponseDto> findAllByUserQuest(UUID userUuid) {
-        User user = userService.findByUuid(userUuid).orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
-        List<UserCategoryStats> allStats = userStatsService.findAllByUser(user);
-        Map<PartnerCategory, Integer> categoryPointsByStat = allStats.stream()
-                .collect(toMap(UserCategoryStats::getCategory, UserCategoryStats::getCountSpendInMonth));
+        //1. Ищем пользователя
+        User user = userService.findByUuid(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
 
-        //если не нашел прогресса пользователя - то выдай, что прогресс на всех квестах, которые ему доступны равны 0
-        //все записи квестами - пользователей
+        //2. Ищем статистику пользователя
+        List<UserCategoryStats> allUserStats = userStatsService.findAllByUser(user);
+
+        //3. Создаем мапу с категориями и количеством потраченного
+        Map<PartnerCategory, BigDecimal> categoryPointsByStat = allUserStats.stream()
+                .collect(toMap(UserCategoryStats::getCategory, UserCategoryStats::getTotalSpend));
+
         List<UserQuest> allUserQuests = userQuestRepository.findAllByUser_Uuid(userUuid);
 
         return allUserQuests.stream().map(
                 userQuest -> {
-                    Quest quest = userQuest.getQuest();
-                    Integer userProgress = categoryPointsByStat.getOrDefault(quest.getCategory(), 0);
-                    return createUserProgress(userQuest, quest, userProgress);
+                    Quest quest = userQuest.getQuest(); //получаем квест
+                    //Получаем трату в месяц
+                    BigDecimal totalSpendInMonth = categoryPointsByStat.getOrDefault(quest.getCategory(), ZERO);
+                    //Делаем маппинг
+                    return createUserProgress(userQuest, quest, totalSpendInMonth);
                 }
         ).toList();
     }
 
+    private BigDecimal generateRandomPoint() {
+        return BigDecimal.valueOf(random.nextInt(1, 11) * 50L);
+    }
 
-    private UserQuestResponseDto createUserProgress(UserQuest userQuest, Quest quest, Integer countSpendInMonth) {
+    private UserQuestResponseDto createUserProgress(UserQuest userQuest, Quest quest, BigDecimal totalSpendInMonth) {
+        var progress = calcProgressInPercent(quest, totalSpendInMonth);
         return new UserQuestResponseDto(
                 generateQuestName(quest),
                 quest.getCategory(),
                 quest.getDateOfExpiry(),
                 quest.getPointReward(),
-                quest.getProgress(),
-                countSpendInMonth,
-                userQuest.getIsComplete()
+                totalSpendInMonth,
+                userQuest.getIsComplete(),
+                progress
         );
+    }
+
+    private BigDecimal calcProgressInPercent(Quest quest, BigDecimal totalSpendInMonth) {
+        return (totalSpendInMonth.multiply(BigDecimal.valueOf(100))).divide(quest.getPointReward(), 2, DOWN);
     }
 
     private String generateQuestName(Quest quest) {
         return "Квест № %s".formatted(quest.getId());
     }
 
-    public List<Quest> findAllAvalaible(LocalDate now) {
+    public List<Quest> findAllAvailable(LocalDate now) {
         //find all Quest where now before now.последнийДень
         return questRepository.findAllByDateOfExpiryIsAfter(now);
     }

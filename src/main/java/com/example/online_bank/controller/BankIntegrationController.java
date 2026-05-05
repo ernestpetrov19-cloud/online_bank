@@ -44,7 +44,7 @@ public class BankIntegrationController {
                     schema = @Schema(implementation = OperationInfoDto.class))
     )
     public OperationInfoDto transfer(@RequestBody TransferDto dto) {
-        return transferService.transferMoney(dto);
+        return transferService.transferMoneyByDifferentPort(dto);
     }
 }
 

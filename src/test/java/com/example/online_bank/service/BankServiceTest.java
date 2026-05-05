@@ -1,6 +1,5 @@
 package com.example.online_bank.service;
 
-import com.example.online_bank.domain.dto.BuyCurrencyDto;
 import com.example.online_bank.domain.dto.ConvertCurrencyResponseDto;
 import com.example.online_bank.domain.dto.FinanceOperationDto;
 import com.example.online_bank.domain.dto.OperationInfoDto;
@@ -14,11 +13,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
-import static com.example.online_bank.enums.CurrencyCode.CNY;
 import static com.example.online_bank.enums.CurrencyCode.RUB;
 import static com.example.online_bank.enums.OperationType.DEPOSIT;
 import static com.example.online_bank.enums.OperationType.WITHDRAW;
@@ -142,50 +138,5 @@ class BankServiceTest {
         assertEquals(dtoRq.accountNumber(), result.accountNumber());
         assertEquals(TEN, result.amount());
         assertEquals(RUB, result.currencyCode());
-    }
-
-    @Test
-    void successBuyCurrency() {
-        BuyCurrencyDto dto = new BuyCurrencyDto("001", "002", BigDecimal.valueOf(100));
-        when(accountService.findCurrencyCode("002")).thenReturn((RUB));
-        List<String> descriptions = List.of(
-                "Продажа валюты со счета %s".formatted(dto.baseAccountNumber()),
-                "Покупка валюты со счета %s".formatted(dto.targetAccountNumber())
-        );
-
-        final String paymentDescription = descriptions.getFirst();
-        final String depositDescription = descriptions.getLast();
-
-        LocalDateTime now = LocalDateTime.now();
-        OperationInfoDto paymentOperationDto = new OperationInfoDto(
-                1L,
-                now,
-                dto.baseAccountNumber(),
-                WITHDRAW,
-                dto.amount(),
-                paymentDescription,
-                CNY);
-
-        when(bankService.makePayment(new FinanceOperationDto(dto.baseAccountNumber(), dto.amount(), paymentDescription, CNY))).thenReturn(paymentOperationDto);
-
-        OperationInfoDto depositOperationDto = new OperationInfoDto(
-                1L,
-                now,
-                dto.targetAccountNumber(),
-                DEPOSIT,
-                dto.amount(),
-                depositDescription,
-                RUB
-        );
-        when(bankService.makeDeposit(new FinanceOperationDto(dto.targetAccountNumber(), dto.amount(), depositDescription, RUB))).thenReturn(depositOperationDto);
-        List<OperationInfoDto> operationDtoResponses = bankService.buyCurrency(dto);
-        log.info("operationDtoResponses - {}", operationDtoResponses);
-        OperationInfoDto paymentDto = operationDtoResponses.getFirst();
-        log.info("paymentDto - {}", paymentDto);
-
-        assertNotNull(operationDtoResponses);
-        assertEquals(paymentDescription, paymentDto.description());
-        assertEquals(CNY, paymentDto.currencyCode());
-        assertEquals("001", paymentDto.accountNumber());
     }
 }

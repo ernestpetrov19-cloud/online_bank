@@ -12,36 +12,39 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class UpdateUserQuestListener {
+public class UpdateUserQuestEventListener {
     private final UserQuestRepository userQuestRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     @EventListener
     @Async
     public void handle(UpdateUserQuestEvent event) {
-        //надо сравнить прогресс в userQuest с ивентом и если равно,
-        // то ставим галочку, что квест выполнен у конкретного пользователя и найти квест и очки перекинуть на новую ентити
+        log.info("Проверка выполнения квеста");
+        //1. Находим квест с категорией и пользователем.
         UserQuest userQuest = userQuestRepository.findByUserAndQuest_CategoryAndQuest_DateOfExpiryIsAfter(
                 event.user(),
                 event.category(),
-                event.spendPeriod()
-        ).orElseThrow(() -> new EntityNotFoundException("Прогресс по данным квестам не найден"));
+                event.lastSpendDate()
+        ).orElseThrow(() -> {
+            log.error("Квесты пользователя не были найдены");
+            return new EntityNotFoundException("Прогресс пользователя по данным квестам не найден");
+        });
 
-        log.info("Прогресс пользователя {}", event.userProgress());
-        log.info("Прогресс пользователя в квесте {}", userQuest.getUserProgress());
-
-        if (event.userProgress() >= userQuest.getQuest().getProgress()) {
+        //2. Если потраченного >= чем требуется для данного квеста, то создаем событие на обновление счета
+        if (event.totalSpendAmount().compareTo(userQuest.getQuest().getPointReward()) >= 0) {
             userQuest.setIsComplete(true);
-            log.info("Квест выполнен {}", userQuest);
+            log.info("Квест выполнен");
             userQuestRepository.save(userQuest);
 
-            Integer points = userQuest.getQuest().getPointReward();
+            BigDecimal points = userQuest.getQuest().getPointReward();
             String userAccountNumber = event.userAccountNumber();
+
             eventPublisher.publishEvent(new UpdateBonusAccountEvent(points, userAccountNumber));
-            log.info("Обновление бонусного счета у пользователя {}", userAccountNumber);
         }
     }
 }

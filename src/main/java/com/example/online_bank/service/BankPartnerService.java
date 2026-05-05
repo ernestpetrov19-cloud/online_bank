@@ -10,24 +10,28 @@ import com.example.online_bank.repository.BankPartnerRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
 
+import static com.example.online_bank.enums.CurrencyCode.RUB;
 import static com.example.online_bank.util.CodeGeneratorUtil.generateAccountNumber;
+import static java.math.BigDecimal.ZERO;
 
 @Service
 @RequiredArgsConstructor
 public class BankPartnerService {
+    public static final String PARTNER_NOT_FOUND_MSG = "Партнер банка не найден";
     private final AccountRepository accountRepository;
     private final BankPartnerRepository bankPartnerRepository;
 
+    @Transactional
     public void create(String name, PartnerCategory category) {
         Account partnerAccount = Account.builder()
-                .balance(BigDecimal.ZERO)
-                .accountNumber(generateAccountNumber(CurrencyCode.RUB))
+                .balance(ZERO)
+                .accountNumber(generateAccountNumber(RUB))
                 .isBlocked(false)
-                .currencyCode(CurrencyCode.RUB)
+                .currencyCode(RUB)
                 .build();
 
         accountRepository.save(partnerAccount);
@@ -42,22 +46,33 @@ public class BankPartnerService {
         accountRepository.save(partnerAccount);
     }
 
-    //FIXME захардкодил
-    public CurrencyCode getAccountCurrencyCode() {
-        return CurrencyCode.RUB;
+    public CurrencyCode findAccountCurrencyCode(String partnerName) {
+        return bankPartnerRepository.findCurrencyCodeByPartnerName(partnerName)
+                .orElseThrow(() -> new EntityNotFoundException(PARTNER_NOT_FOUND_MSG));
     }
 
-    public String getAccountNumber(String partnerName) {
+    public String findAccountNumber(String partnerName) {
         return bankPartnerRepository.findAccountNumberByPartnerName(partnerName).orElseThrow(
-                () -> new EntityNotFoundException("Партнер банка не найден")
+                () -> new EntityNotFoundException(PARTNER_NOT_FOUND_MSG)
         );
     }
 
-
     public List<BankPartnerDto> getAll() {
-        //todo перекинуть на маппер
+        //todo переделать на маппер
         return bankPartnerRepository.findAll().stream()
                 .map(e -> new BankPartnerDto(e.getName(), e.getPartnerCategory()))
+                .toList();
+    }
+
+    public PartnerCategory findPartnerCategoryByName(String name) {
+        return bankPartnerRepository.findByNamePartnerCategory(name)
+                .orElseThrow(() -> new EntityNotFoundException(PARTNER_NOT_FOUND_MSG));
+    }
+
+    public List<BankPartnerDto> findPartnerByNameContaining(String name) {
+       return bankPartnerRepository.findTop5ByNameContainingIgnoreCase(name).stream()
+                .map(bankPartnerCategory -> new BankPartnerDto(bankPartnerCategory.getName(),
+                                bankPartnerCategory.getPartnerCategory()))
                 .toList();
     }
 }

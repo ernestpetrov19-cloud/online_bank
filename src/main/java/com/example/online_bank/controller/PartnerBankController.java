@@ -24,4 +24,9 @@ public class PartnerBankController {
     public List<BankPartnerDto> getAll() {
         return bankPartnerService.getAll();
     }
+
+    @GetMapping("find-by-containing-name")
+    public List<BankPartnerDto> findByNameContaining(@RequestParam String name){
+        return bankPartnerService.findPartnerByNameContaining(name);
+    }
 }

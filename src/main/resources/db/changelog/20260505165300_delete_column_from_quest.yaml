@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260505165300_delete_column_from_quest.yaml
+      author: gilmanovamir
+      changes:
+        - dropColumn:
+            tableName: quest
+            columnName: progress

@@ -76,7 +76,8 @@ public class SecurityConfig {
                                 ).permitAll()
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                 .requestMatchers(
-                                        "/api/bank-partner"
+                                        "/api/bank-partner",
+                                        "api/bank-partner/find-by-containing-name"
                                 )
                                 .permitAll()
                                 .anyRequest()

@@ -3,7 +3,10 @@ package com.example.online_bank.security.config;
 import com.example.online_bank.security.filter.JwtRequestFilter;
 import com.example.online_bank.security.provider.JwtRequestProvider;
 import com.example.online_bank.service.UserService;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -27,10 +30,19 @@ import java.util.List;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
+    @Value("${app.cors.allowed-origins}")
+    private String corsUrl;
+
+    @PostConstruct
+    void init(){
+        log.info("CORS URL IS - {}", corsUrl);
+    }
+
     //    Реализация фильтра для настройки конечных точек протокола
     @Bean
     public SecurityFilterChain securityFilterChain(
@@ -96,13 +108,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowCredentials(true); // Для JWT/Cookies
-        configuration.setAllowedOrigins(List.of(
-                "https://online-bank-hyper-revolution-computer-systems-9snxospn0.vercel.app",
-                "https://online-bank-hyper-revolution-computer-systems-ly60rs8rj.vercel.app",
-                "https://online-bank-hyper-revolution-comput.vercel.app",
-                "https://online-bank-hyper-revolution-git-cf49f5-amirgilmanovs-projects.vercel.app",
-                "http://localhost:3000"
-        ));
+        configuration.setAllowedOrigins(List.of(corsUrl));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 

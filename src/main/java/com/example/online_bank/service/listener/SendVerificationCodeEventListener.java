@@ -13,7 +13,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class SendVerificationCodeEventListener {
     private final NotificationService notificationService;
 
-    public SendVerificationCodeEventListener(@Qualifier("defaultNotificationService") NotificationService notificationService) {
+    public SendVerificationCodeEventListener(@Qualifier("resendService") NotificationService notificationService) {
         this.notificationService = notificationService;
     }
 

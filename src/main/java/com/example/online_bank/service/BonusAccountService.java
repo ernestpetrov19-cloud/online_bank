@@ -22,7 +22,7 @@ import static com.example.online_bank.enums.CurrencyCode.RUB;
 @RequiredArgsConstructor
 @Slf4j
 public class BonusAccountService {
-    public static final String DESCRIPTION = "Пополнение бонусов";
+    public static final String DESCRIPTION = "Обмен бонусов";
     private static final String ERR_MSG = "Не хватает бонусов для выполнения операции.";
     public static final double CONVERT_COEFFICIENT = 0.5;
 

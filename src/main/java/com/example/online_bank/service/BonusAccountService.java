@@ -42,24 +42,24 @@ public class BonusAccountService {
                 .orElseThrow(EntityNotFoundException::new);
     }
 
-    public OperationInfoDto convertPoints(String accountNumber, BigDecimal amount) {
+    public OperationInfoDto convertPoints(String accountNumber, BigDecimal amountPoints) {
         BonusAccount bonusAccount = bonusAccountRepository.findByAccount_AccountNumber(accountNumber).orElseThrow(
                 () -> new EntityNotFoundException("Счет не существует")
         );
 
-        if (amount.compareTo(bonusAccount.getPoints()) > 0) {
+        if (amountPoints.compareTo(bonusAccount.getPoints()) > 0) {
             log.warn("Не хватает бонусов для снятия");
             throw new ConvertBonusException(ERR_MSG);
         }
 
-        BigDecimal convertResult = amount.multiply(BigDecimal.valueOf(CONVERT_COEFFICIENT));
+        BigDecimal convertResult = amountPoints.multiply(BigDecimal.valueOf(CONVERT_COEFFICIENT));
         FinanceOperationDto operationDto = new FinanceOperationDto(
                 accountNumber,
                 convertResult,
                 DESCRIPTION,
                 RUB
         );
-        withdrawBonus(accountNumber, bonusAccount.getPoints());
+        withdrawBonus(accountNumber, amountPoints);
         return bankService.makeDeposit(operationDto);
     }
 
